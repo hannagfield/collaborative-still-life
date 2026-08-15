@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Surro: Still Life Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEDE8;
+    --paper-2:#E3E3DC;
+    --panel:#F7F7F3;
+    --ink:#22252A;
+    --muted:#6E7580;
+    --rule:#D2D2C9;
+    --accent:#2C3E5C;
+    --shadow:0 1px 2px rgba(34,37,42,.06), 0 8px 24px rgba(34,37,42,.05);
+    --gap:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:14px;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  .label{
+    font-size:10px;
+    font-weight:600;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  button{font-family:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* ---------- shell ---------- */
+  .app{
+    display:grid;
+    grid-template-columns:212px minmax(0,1fr) 236px;
+    grid-template-rows:auto minmax(0,1fr);
+    height:100%;
+    gap:var(--gap);
+    padding:var(--gap);
+  }
+  header{
+    grid-column:1/-1;
+    display:flex;align-items:baseline;gap:18px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--rule);
+  }
+  .wordmark{
+    font-family:"Spectral",Georgia,serif;
+    font-size:19px;font-weight:500;
+    letter-spacing:-.01em;
+    white-space:nowrap;
+  }
+  .wordmark em{font-style:italic;font-weight:400}
+  #title{
+    flex:1;min-width:80px;
+    font-family:"Spectral",Georgia,serif;
+    font-style:italic;font-size:16px;
+    background:transparent;border:0;
+    border-bottom:1px solid transparent;
+    color:var(--ink);padding:2px 0;
+  }
+  #title:hover{border-bottom-color:var(--rule)}
+  #title:focus{outline:none;border-bottom-color:var(--accent)}
+  #title::placeholder{color:#A9AEB4;font-style:italic}
+  .print-btn{
+    background:var(--ink);color:var(--paper);
+    border:0;border-radius:2px;
+    padding:9px 18px;
+    font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  }
+  .print-btn:hover{background:var(--accent)}
+
+  /* ---------- panels ---------- */
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--rule);
+    border-radius:3px;
+    display:flex;flex-direction:column;
+    min-height:0;
+    box-shadow:var(--shadow);
+  }
+  .panel > h2{
+    margin:0;padding:11px 13px 9px;
+    border-bottom:1px solid var(--rule);
+    font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .panel-body{overflow-y:auto;padding:6px;min-height:0}
+
+  /* ---------- library ---------- */
+  .shelf{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+  .item{
+    background:transparent;border:1px solid transparent;border-radius:2px;
+    padding:6px 4px 7px;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+  }
+  .item:hover{background:#fff;border-color:var(--rule)}
+  .item canvas{display:block;width:58px;height:58px}
+  .item .nm{font-family:"Spectral",Georgia,serif;font-size:12.5px;line-height:1.1}
+  .item .acc{font-size:8.5px;letter-spacing:.13em;color:#9AA0A8;font-weight:600}
+
+  /* ---------- saved arrangements ---------- */
+  .col{display:flex;flex-direction:column;gap:var(--gap);min-height:0}
+  .mini{
+    background:transparent;border:1px solid var(--rule);border-radius:2px;
+    padding:4px 8px;font-size:9px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);
+  }
+  .mini:hover{border-color:var(--accent);color:var(--accent)}
+  .platefoot{display:flex;gap:5px;padding:7px;border-top:1px solid var(--rule)}
+  .platefoot .mini{flex:1}
+  .plate{display:flex;align-items:stretch;gap:2px;border-bottom:1px solid #E6E6DF}
+  .plate:last-child{border-bottom:0}
+  .plateopen{
+    flex:1;min-width:0;background:transparent;border:0;text-align:left;
+    padding:7px 6px;display:flex;flex-direction:column;gap:1px;border-radius:2px;
+  }
+  .plateopen:hover{background:#fff}
+  .pn{font-size:8.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#9AA0A8}
+  .pt{font-family:"Spectral",Georgia,serif;font-size:13px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pd{font-size:9.5px;color:var(--muted)}
+  .platex{background:transparent;border:0;color:#B0B5BC;font-size:15px;line-height:1;padding:0 7px;border-radius:2px}
+  .platex:hover{color:#8C3A2E;background:#FBF3F1}
+  .empty{margin:0;padding:10px 8px;font-size:11px;line-height:1.5;color:var(--muted)}
+
+  /* ---------- viewport ---------- */
+  .stage{
+    position:relative;border-radius:3px;overflow:hidden;
+    border:1px solid var(--rule);
+    background:radial-gradient(120% 95% at 50% 8%, #F2F2ED 0%, #E4E5DE 55%, #D4D6CE 100%);
+    box-shadow:var(--shadow);
+    min-height:0;
+  }
+  .stage canvas{display:block;width:100%;height:100%;touch-action:none}
+  .hint{
+    position:absolute;left:14px;bottom:12px;
+    font-size:11px;color:var(--muted);
+    pointer-events:none;
+    max-width:62%;
+  }
+  .selbar{
+    position:absolute;left:50%;transform:translateX(-50%);bottom:14px;
+    display:none;align-items:center;gap:14px;
+    background:rgba(255,255,255,.94);
+    border:1px solid var(--rule);border-radius:3px;
+    padding:8px 12px;
+    backdrop-filter:blur(6px);
+    box-shadow:var(--shadow);
+  }
+  .selbar.on{display:flex}
+  .selbar .nm{font-family:"Spectral",Georgia,serif;font-size:13px;padding-right:2px}
+  .selbar .grp{display:flex;flex-direction:column;gap:3px}
+  .selbar input[type=range]{width:88px}
+  .rm{
+    background:transparent;border:1px solid var(--rule);border-radius:2px;
+    padding:5px 9px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  }
+  .rm:hover{color:#8C3A2E;border-color:#D8BDB6;background:#FBF3F1}
+
+  /* ---------- light ---------- */
+  .lightbody{padding:13px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+  .pad{
+    position:relative;width:100%;aspect-ratio:1/1;
+    border:1px solid var(--rule);border-radius:2px;
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0%, #fff 34%, transparent 34.5%),
+      var(--panel);
+    cursor:crosshair;touch-action:none;
+  }
+  .pad::after{
+    content:"";position:absolute;inset:0;
+    background:
+      linear-gradient(to right, transparent calc(50% - .5px), var(--rule) calc(50% - .5px), var(--rule) calc(50% + .5px), transparent calc(50% + .5px)),
+      linear-gradient(to bottom, transparent calc(50% - .5px), var(--rule) calc(50% - .5px), var(--rule) calc(50% + .5px), transparent calc(50% + .5px));
+    pointer-events:none;
+  }
+  .pad .tbl{
+    position:absolute;left:33%;top:33%;width:34%;height:34%;
+    border:1px dashed #C3C4BB;border-radius:50%;pointer-events:none;
+  }
+  .puck{
+    position:absolute;width:15px;height:15px;border-radius:50%;
+    transform:translate(-50%,-50%);
+    background:#E9C27A;border:1.5px solid rgba(34,37,42,.35);
+    box-shadow:0 0 0 5px rgba(233,194,122,.22);
+    pointer-events:none;
+  }
+  .row{display:flex;flex-direction:column;gap:5px}
+  .row .top{display:flex;justify-content:space-between;align-items:baseline}
+  .row .val{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:2px;
+    background:var(--rule);border-radius:2px;outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+    background:var(--panel);border:1.5px solid var(--ink);cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:12px;height:12px;border-radius:50%;
+    background:var(--panel);border:1.5px solid var(--ink);cursor:pointer;
+  }
+  .note{font-size:10.5px;line-height:1.45;color:var(--muted);border-top:1px solid var(--rule);padding-top:10px}
+
+  @media (max-width:900px){
+    body{overflow:auto}
+    .app{grid-template-columns:1fr;grid-template-rows:auto auto 56vh auto;height:auto;min-height:100%}
+    header{flex-wrap:wrap;gap:10px}
+    .shelf{grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
+    .panel-body{max-height:200px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="wordmark">Surro<em>: Still Life Studio</em></div>
+    <input id="title" placeholder="Untitled arrangement" aria-label="Title of this arrangement" />
+    <button class="print-btn" id="print">Print</button>
+  </header>
+
+  <div class="col">
+    <section class="panel" aria-label="Scan library" style="flex:1 1 auto;min-height:0">
+      <h2>Collection <span id="count" style="letter-spacing:.06em">10</span></h2>
+      <div class="panel-body"><div class="shelf" id="shelf"></div></div>
+    </section>
+    <section class="panel" aria-label="Saved arrangements" style="flex:0 1 auto;max-height:46%">
+      <h2>Plates <button class="mini" id="savePlate">Save this one</button></h2>
+      <div class="panel-body" id="plates"></div>
+      <div class="platefoot">
+        <button class="mini" id="clearTable">Clear table</button>
+        <button class="mini" id="exportBtn">Export file</button>
+        <button class="mini" id="importBtn">Open file</button>
+        <input type="file" id="fileIn" accept="application/json,.json" hidden>
+      </div>
+    </section>
+  </div>
+
+  <section class="stage" id="stage">
+    <div class="hint" id="hint">Click an object in the collection to set it on the table. Drag to move it, drag the background to walk around.</div>
+    <div class="selbar" id="selbar">
+      <span class="nm" id="selname">—</span>
+      <div class="grp"><span class="label">Turn</span><input type="range" id="rot" min="0" max="360" value="0" aria-label="Turn selected object"></div>
+      <div class="grp"><span class="label">Size</span><input type="range" id="scl" min="60" max="180" value="100" aria-label="Resize selected object"></div>
+      <button class="rm" id="rm">remove</button>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="Lighting">
+    <h2>The light</h2>
+    <div class="lightbody">
+      <div class="row">
+        <span class="label">Where the window is</span>
+        <div class="pad" id="pad" tabindex="0" role="application" aria-label="Drag to place the light around the table">
+          <div class="tbl"></div>
+          <div class="puck" id="puck" style="left:32%;top:30%"></div>
+        </div>
+        <span class="val" id="padval">side light, from the left</span>
+      </div>
+      <div class="row">
+        <div class="top"><span class="label">Warmth</span><span class="val" id="wv">5200K</span></div>
+        <input type="range" id="warm" min="0" max="100" value="46" aria-label="Light warmth">
+      </div>
+      <div class="row">
+        <div class="top"><span class="label">Strength</span><span class="val" id="iv">medium</span></div>
+        <input type="range" id="inten" min="10" max="100" value="58" aria-label="Light strength">
+      </div>
+      <div class="row">
+        <div class="top"><span class="label">Softness</span><span class="val" id="sv">soft</span></div>
+        <input type="range" id="soft" min="0" max="100" value="45" aria-label="Shadow softness">
+      </div>
+      <div class="row">
+        <div class="top"><span class="label">Bounce card</span><span class="val" id="bv">low</span></div>
+        <input type="range" id="bounce" min="0" max="100" value="26" aria-label="Fill light from bounce card">
+      </div>
+      <p class="note">A bounce card is a white board on the shadow side. It throws light back into the darks without adding a second shadow.</p>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   1. THE COLLECTION
+   Stand-in props built from lathe profiles, the way a vessel
+   typology drawing works. Swap these for loaded .glb scans by
+   replacing buildMesh() with a GLTFLoader call.
+   ============================================================ */
+
+var LIBRARY = [
+  { id:"pear",    acc:"SL 001", name:"Pear",        color:0x9AA05C, rough:0.72, metal:0.0,
+    profile:[[0,0],[.028,.002],[.040,.014],[.045,.030],[.043,.046],[.036,.060],[.026,.072],[.019,.084],[.015,.095],[.012,.103],[.006,.108],[0,.110]] },
+  { id:"apple",   acc:"SL 002", name:"Apple",       color:0xA34B3A, rough:0.55, metal:0.0,
+    profile:[[0,.006],[.016,.002],[.030,.008],[.037,.024],[.038,.044],[.030,.062],[.018,.070],[.008,.070],[.004,.075],[0,.074]] },
+  { id:"egg",     acc:"SL 003", name:"Egg",         color:0xE8DFCF, rough:0.62, metal:0.0,
+    profile:[[0,0],[.012,.002],[.019,.010],[.022,.024],[.021,.040],[.016,.052],[.009,.058],[0,.060]] },
+  { id:"bowl",    acc:"SL 004", name:"Bowl",        color:0x7C8B93, rough:0.30, metal:0.0, open:true,
+    profile:[[0,0],[.030,0],[.055,.010],[.078,.035],[.090,.070],[.086,.070],[.074,.038],[.052,.014],[.026,.006],[0,.006]] },
+  { id:"cup",     acc:"SL 005", name:"Cup",         color:0xEDEAE2, rough:0.28, metal:0.0, open:true, handle:{r:.030,t:.005,y:.052,x:.036},
+    profile:[[0,0],[.028,0],[.032,.004],[.034,.085],[.034,.090],[.030,.090],[.029,.008],[.024,.005],[0,.005]] },
+  { id:"jug",     acc:"SL 006", name:"Jug",         color:0xC2B49A, rough:0.35, metal:0.0, open:true, handle:{r:.048,t:.008,y:.115,x:.062},
+    profile:[[0,0],[.045,0],[.048,.006],[.055,.050],[.058,.090],[.050,.130],[.038,.160],[.036,.185],[.040,.198],[.036,.200],[.032,.186],[.033,.160],[.045,.130],[.052,.090],[.048,.050],[.040,.008],[0,.008]] },
+  { id:"bottle",  acc:"SL 007", name:"Bottle",      color:0x3E5B4A, rough:0.16, metal:0.0,
+    profile:[[0,0],[.038,0],[.040,.005],[.040,.150],[.038,.165],[.030,.190],[.018,.215],[.014,.235],[.014,.268],[.017,.275],[.017,.280],[0,.280]] },
+  { id:"candle",  acc:"SL 008", name:"Candlestick", color:0x8C7A5E, rough:0.24, metal:0.75,
+    profile:[[0,0],[.040,0],[.042,.006],[.030,.012],[.014,.020],[.010,.040],[.012,.120],[.010,.140],[.022,.150],[.026,.160],[.020,.166],[.012,.170],[.010,.175],[.010,.220],[0,.220]] },
+  { id:"plate",   acc:"SL 009", name:"Plate",       color:0xE4E0D6, rough:0.26, metal:0.0, open:true,
+    profile:[[0,0],[.060,.001],[.085,.008],[.105,.020],[.110,.024],[.106,.024],[.086,.014],[.058,.006],[0,.005]] },
+  { id:"book",    acc:"SL 010", name:"Book",        color:0x6B5344, rough:0.80, metal:0.0,
+    box:[.155,.034,.215] },
+  { id:"allium-flower", acc:"SCAN 001", name:"Allium Flower", scan:true,
+    glb:"Purple-Allium-Flower.glb", targetHeight:0.16, previewSize:[0.52,1.0] },
+  { id:"tall-cactus", acc:"SCAN 002", name:"Tall Cactus", scan:true,
+    glb:"Tall_Cactus.glb", targetHeight:0.32, previewSize:[0.37,1.0] },
+  { id:"kitch-flower-sculpture", acc:"SCAN 003", name:"Kitch Flower Sculpture", scan:true,
+    glb:"Kitch_Flower_Sculpture.glb", targetHeight:0.15, previewSize:[0.52,1.0] }
+];
+
+/* ============================================================
+   2. SCENE
+   ============================================================ */
+
+var stage   = document.getElementById("stage");
+var renderer, scene, camera, key, fill, hemi, ground, ring;
+var props = [];          // placed objects
+var selected = null;
+var needsRender = true;
+
+renderer = new THREE.WebGLRenderer({
+  antialias:true, alpha:true, preserveDrawingBuffer:true
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.physicallyCorrectLights = false;
+stage.appendChild(renderer.domElement);
+
+scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xE0E1DA, 1.3, 3.6);
+
+camera = new THREE.PerspectiveCamera(32, 1, 0.05, 30);
+
+// tabletop
+ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(6, 6),
+  new THREE.MeshStandardMaterial({ color:0xD9D7CC, roughness:0.94, metalness:0.0 })
+);
+ground.rotation.x = -Math.PI/2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// footprint ring for the selected object
+ring = new THREE.Mesh(
+  new THREE.RingGeometry(0.9, 1.0, 64),
+  new THREE.MeshBasicMaterial({ color:0x2C3E5C, transparent:true, opacity:0.75, side:THREE.DoubleSide })
+);
+ring.rotation.x = -Math.PI/2;
+ring.position.y = 0.0012;
+ring.visible = false;
+scene.add(ring);
+
+key = new THREE.DirectionalLight(0xffffff, 2.4);
+key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+key.shadow.camera.left = -0.85; key.shadow.camera.right = 0.85;
+key.shadow.camera.top  =  0.85; key.shadow.camera.bottom= -0.85;
+key.shadow.camera.near = 0.2;   key.shadow.camera.far   = 8;
+key.shadow.bias = -0.0012;
+key.shadow.normalBias = 0.012;
+scene.add(key);
+scene.add(key.target);
+
+fill = new THREE.DirectionalLight(0xffffff, 0.5);
+scene.add(fill);
+
+hemi = new THREE.HemisphereLight(0xE7ECF2, 0xBFBBAA, 0.55);
+scene.add(hemi);
+
+/* ---------- camera orbit ---------- */
+var orbit = { az: -0.62, el: 0.40, dist: 1.05, target: new THREE.Vector3(0, 0.10, 0) };
+function placeCamera(){
+  var ce = Math.cos(orbit.el), se = Math.sin(orbit.el);
+  camera.position.set(
+    orbit.target.x + Math.cos(orbit.az)*ce*orbit.dist,
+    orbit.target.y + se*orbit.dist,
+    orbit.target.z + Math.sin(orbit.az)*ce*orbit.dist
+  );
+  camera.lookAt(orbit.target);
+  needsRender = true;
+}
+
+function resize(){
+  var w = stage.clientWidth, h = stage.clientHeight;
+  if(!w || !h) return;
+  renderer.setSize(w, h, false);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+  needsRender = true;
+}
+window.addEventListener("resize", resize);
+
+/* ============================================================
+   3. BUILDING PROPS
+   ============================================================ */
+
+function latheGeom(profile, segments){
+  var pts = profile.map(function(p){ return new THREE.Vector2(Math.max(p[0], 0.0001), p[1]); });
+  var g = new THREE.LatheGeometry(pts, segments || 64);
+  g.computeVertexNormals();
+  return g;
+}
+
+/* ---------- loaded scans (.glb) ---------- */
+var gltfLoader = (typeof THREE.GLTFLoader === "function") ? new THREE.GLTFLoader() : null;
+var scanCache = {};   // url -> Promise<THREE.Object3D>
+
+function loadScan(def, group){
+  if(!gltfLoader) return;
+  var promise = scanCache[def.glb];
+  if(!promise){
+    promise = new Promise(function(resolve, reject){
+      gltfLoader.load(def.glb, function(gltf){ resolve(gltf.scene); }, undefined, reject);
+    });
+    scanCache[def.glb] = promise;
+  }
+  promise.then(function(sourceScene){
+    var model = sourceScene.clone(true);
+    model.traverse(function(o){
+      if(o.isMesh){
+        o.castShadow = true;
+        o.receiveShadow = true;
+        if(o.material){
+          o.material = o.material.clone();
+          o.material.metalness = 0;                 // scanned surfaces read as metallic without this
+          if(o.material.roughness >= 1) o.material.roughness = 0.85;
+          o.material.side = THREE.DoubleSide;        // thin scanned geometry drops backfaces otherwise
+        }
+      }
+    });
+
+    // normalize scale to the object's real height, then rest its base on the table
+    var box = new THREE.Box3().setFromObject(model);
+    var rawSize = new THREE.Vector3(); box.getSize(rawSize);
+    var scale = rawSize.y > 0.0001 ? (def.targetHeight || 0.16) / rawSize.y : 1;
+    model.scale.setScalar(scale);
+
+    box.setFromObject(model);
+    var size = new THREE.Vector3(); box.getSize(size);
+    var center = new THREE.Vector3(); box.getCenter(center);
+    model.position.x -= center.x;
+    model.position.y -= box.min.y;
+    model.position.z -= center.z;
+
+    group.userData.radius = (Math.max(size.x, size.z) / 2) * 1.15;
+    group.add(model);
+
+    if(selected === group) updateRing();
+    needsRender = true;
+    touch();
+  }).catch(function(err){
+    console.error("Could not load scan:", def.glb, err);
+  });
+}
+
+function buildMesh(def){
+  var group = new THREE.Group();
+  group.userData.def = def;
+  group.userData.baseScale = 1;
+  group.userData.radius = footprint(def);
+
+  if(def.glb){
+    loadScan(def, group);
+    return group;
+  }
+
+  var mat = new THREE.MeshStandardMaterial({
+    color: def.color,
+    roughness: def.rough,
+    metalness: def.metal,
+    side: def.open ? THREE.DoubleSide : THREE.FrontSide,
+    flatShading: false
+  });
+
+  var body;
+  if(def.box){
+    body = new THREE.Mesh(new THREE.BoxGeometry(def.box[0], def.box[1], def.box[2]), mat);
+    body.position.y = def.box[1]/2;
+  } else {
+    body = new THREE.Mesh(latheGeom(def.profile), mat);
+  }
+  body.castShadow = true;
+  body.receiveShadow = true;
+  group.add(body);
+
+  if(def.handle){
+    var h = new THREE.Mesh(
+      new THREE.TorusGeometry(def.handle.r, def.handle.t, 10, 28, Math.PI*1.35),
+      mat
+    );
+    h.rotation.z = Math.PI*1.325;      // rotates the torus's open gap to face inward, into the vessel wall, instead of out where it's visible
+    h.position.set(def.handle.x, def.handle.y, 0);
+    h.castShadow = true;
+    group.add(h);
+  }
+
+  return group;
+}
+
+function footprint(def){
+  if(def.glb) return (def.previewSize ? def.previewSize[0]/2 : 0.05) * 1.2;
+  if(def.box) return Math.max(def.box[0], def.box[2]) * 0.62;
+  var r = 0;
+  for(var i=0;i<def.profile.length;i++) r = Math.max(r, def.profile[i][0]);
+  return r * 1.18;
+}
+
+/* ---------- catalogue silhouettes for the shelf ---------- */
+function drawSilhouette(def, cv){
+  var dpr = Math.min(window.devicePixelRatio, 2);
+  var S = 58;
+  cv.width = S*dpr; cv.height = S*dpr;
+  var c = cv.getContext("2d");
+  c.scale(dpr, dpr);
+  c.clearRect(0,0,S,S);
+
+  var pad = 7, avail = S - pad*2;
+  var pts, maxR, maxY;
+
+  if(def.glb){
+    maxR = (def.previewSize ? def.previewSize[0] : 0.5)/2; maxY = def.previewSize ? def.previewSize[1] : 1.0;
+    pts = [[0,0],[maxR,0],[maxR,maxY],[0,maxY]];
+  } else if(def.box){
+    maxR = def.box[0]/2; maxY = def.box[1];
+    pts = [[0,0],[maxR,0],[maxR,maxY],[0,maxY]];
+  } else {
+    pts = def.profile;
+    maxR = 0; maxY = 0;
+    for(var i=0;i<pts.length;i++){ maxR = Math.max(maxR, pts[i][0]); maxY = Math.max(maxY, pts[i][1]); }
+  }
+  var k = Math.min(avail/(maxR*2), avail/maxY);
+  var cx = S/2, base = S - pad;
+
+  c.beginPath();
+  c.moveTo(cx + pts[0][0]*k, base - pts[0][1]*k);
+  for(var j=1;j<pts.length;j++) c.lineTo(cx + pts[j][0]*k, base - pts[j][1]*k);
+  for(var m=pts.length-1;m>=0;m--) c.lineTo(cx - pts[m][0]*k, base - pts[m][1]*k);
+  c.closePath();
+  c.fillStyle = "rgba(34,37,42,.80)";
+  c.fill();
+
+  // centre line, the way a profile drawing marks the axis of rotation
+  if(!def.box && !def.glb){
+    c.strokeStyle = "rgba(247,247,243,.55)";
+    c.setLineDash([2,3]);
+    c.lineWidth = 1;
+    c.beginPath(); c.moveTo(cx, base - maxY*k); c.lineTo(cx, base); c.stroke();
+    c.setLineDash([]);
+  }
+}
+
+/* ---------- shelf UI ---------- */
+var shelf = document.getElementById("shelf");
+LIBRARY.forEach(function(def){
+  var b = document.createElement("button");
+  b.className = "item";
+  b.title = "Set " + def.name.toLowerCase() + " on the table";
+  var cv = document.createElement("canvas");
+  drawSilhouette(def, cv);
+  var nm = document.createElement("span"); nm.className = "nm"; nm.textContent = def.name;
+  var ac = document.createElement("span"); ac.className = "acc"; ac.textContent = def.acc;
+  b.appendChild(cv); b.appendChild(nm); b.appendChild(ac);
+  b.addEventListener("click", function(){ addProp(def); });
+  shelf.appendChild(b);
+});
+document.getElementById("count").textContent = LIBRARY.length;
+
+/* ---------- placing ---------- */
+var placeIndex = 0;
+function addProp(def){
+  var g = buildMesh(def);
+  var a = placeIndex * 2.399963;              // golden-angle spiral, so nothing lands on top of itself
+  var r = 0.055 * Math.sqrt(placeIndex + 0.6);
+  g.position.set(Math.cos(a)*r, 0, Math.sin(a)*r);
+  g.rotation.y = Math.random() * Math.PI * 2;
+  placeIndex++;
+  scene.add(g);
+  props.push(g);
+  select(g);
+  document.getElementById("hint").style.display = "none";
+  needsRender = true;
+  touch();
+}
+
+function removeProp(g){
+  scene.remove(g);
+  g.traverse(function(o){
+    if(o.geometry) o.geometry.dispose();
+    if(o.material) o.material.dispose();
+  });
+  props.splice(props.indexOf(g), 1);
+  if(selected === g) select(null);
+  needsRender = true;
+  touch();
+}
+
+/* ---------- selection ---------- */
+var selbar  = document.getElementById("selbar");
+var selname = document.getElementById("selname");
+var rotEl   = document.getElementById("rot");
+var sclEl   = document.getElementById("scl");
+
+function select(g){
+  selected = g;
+  if(!g){
+    selbar.classList.remove("on");
+    ring.visible = false;
+    needsRender = true;
+    return;
+  }
+  selbar.classList.add("on");
+  selname.textContent = g.userData.def.name;
+  rotEl.value = Math.round((g.rotation.y * 180/Math.PI + 3600) % 360);
+  sclEl.value = Math.round(g.scale.x * 100);
+  updateRing();
+}
+
+function updateRing(){
+  if(!selected){ ring.visible = false; return; }
+  var r = selected.userData.radius * selected.scale.x;
+  ring.scale.set(r, r, r);
+  ring.position.x = selected.position.x;
+  ring.position.z = selected.position.z;
+  ring.visible = true;
+  needsRender = true;
+}
+
+rotEl.addEventListener("input", function(){
+  if(!selected) return;
+  selected.rotation.y = rotEl.value * Math.PI/180;
+  needsRender = true;
+  touch();
+});
+sclEl.addEventListener("input", function(){
+  if(!selected) return;
+  var s = sclEl.value/100;
+  selected.scale.set(s, s, s);
+  updateRing();
+  touch();
+});
+document.getElementById("rm").addEventListener("click", function(){
+  if(selected) removeProp(selected);
+});
+
+/* ============================================================
+   4. POINTER: drag props on the tabletop, drag the room to orbit
+   ============================================================ */
+
+var ray = new THREE.Raycaster();
+var ndc = new THREE.Vector2();
+var tablePlane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
+var hitPoint = new THREE.Vector3();
+var drag = null;
+
+function toNDC(e){
+  var r = renderer.domElement.getBoundingClientRect();
+  ndc.x = ((e.clientX - r.left)/r.width)*2 - 1;
+  ndc.y = -((e.clientY - r.top)/r.height)*2 + 1;
+}
+
+function pick(e){
+  toNDC(e);
+  ray.setFromCamera(ndc, camera);
+  var hits = ray.intersectObjects(props, true);
+  if(!hits.length) return null;
+  var o = hits[0].object;
+  while(o && props.indexOf(o) === -1) o = o.parent;
+  return o;
+}
+
+renderer.domElement.addEventListener("pointerdown", function(e){
+  renderer.domElement.setPointerCapture(e.pointerId);
+  var hit = pick(e);
+  if(hit){
+    select(hit);
+    ray.setFromCamera(ndc, camera);
+    ray.ray.intersectPlane(tablePlane, hitPoint);
+    drag = { mode:"move", obj:hit,
+             off:new THREE.Vector3().subVectors(hit.position, hitPoint) };
+  } else {
+    select(null);
+    drag = { mode:"orbit", x:e.clientX, y:e.clientY };
+  }
+});
+
+renderer.domElement.addEventListener("pointermove", function(e){
+  if(!drag) return;
+  if(drag.mode === "move"){
+    toNDC(e);
+    ray.setFromCamera(ndc, camera);
+    if(ray.ray.intersectPlane(tablePlane, hitPoint)){
+      drag.obj.position.copy(hitPoint).add(drag.off);
+      drag.obj.position.y = 0;                       // objects stay on the table
+      var lim = 0.62;
+      drag.obj.position.x = Math.max(-lim, Math.min(lim, drag.obj.position.x));
+      drag.obj.position.z = Math.max(-lim, Math.min(lim, drag.obj.position.z));
+      updateRing();
+    }
+  } else {
+    orbit.az -= (e.clientX - drag.x) * 0.006;
+    orbit.el = Math.max(0.06, Math.min(1.30, orbit.el + (e.clientY - drag.y) * 0.005));
+    drag.x = e.clientX; drag.y = e.clientY;
+    placeCamera();
+  }
+});
+
+function endDrag(e){
+  drag = null;
+  touch();
+  try{ renderer.domElement.releasePointerCapture(e.pointerId); }catch(err){}
+}
+renderer.domElement.addEventListener("pointerup", endDrag);
+renderer.domElement.addEventListener("pointercancel", endDrag);
+
+renderer.domElement.addEventListener("wheel", function(e){
+  e.preventDefault();
+  orbit.dist = Math.max(0.42, Math.min(2.4, orbit.dist * (1 + Math.sign(e.deltaY)*0.08)));
+  placeCamera();
+  touch();
+}, { passive:false });
+
+document.addEventListener("keydown", function(e){
+  var t = e.target.tagName;
+  if(t === "INPUT" || t === "TEXTAREA") return;
+  if((e.key === "Delete" || e.key === "Backspace") && selected){
+    e.preventDefault(); removeProp(selected);
+  }
+  if(e.key === "Escape") select(null);
+});
+
+/* ============================================================
+   5. THE LIGHT
+   ============================================================ */
+
+var L = { nx:-0.36, nz:-0.40, warm:46, inten:58, soft:45, bounce:26 };
+
+function kelvinToRGB(k){
+  var t = k/100, r, g, b;
+  if(t <= 66){ r = 255; }
+  else { r = 329.7 * Math.pow(t - 60, -0.1332); }
+  if(t <= 66){ g = 99.47 * Math.log(t) - 161.12; }
+  else { g = 288.12 * Math.pow(t - 60, -0.0755); }
+  if(t >= 66){ b = 255; }
+  else if(t <= 19){ b = 0; }
+  else { b = 138.52 * Math.log(t - 10) - 305.04; }
+  var cl = function(v){ return Math.max(0, Math.min(255, v))/255; };
+  return new THREE.Color(cl(r), cl(g), cl(b));
+}
+
+function describeDirection(nx, nz){
+  var r = Math.sqrt(nx*nx + nz*nz);
+  if(r < 0.22) return "almost overhead";
+  var side = nx < -0.18 ? "from the left" : (nx > 0.18 ? "from the right" : "from straight on");
+  var kind = r > 0.74 ? "low raking light" : (nz > 0.35 ? "back light" : "side light");
+  return kind + ", " + side;
+}
+
+function applyLight(){
+  var r  = Math.min(1, Math.sqrt(L.nx*L.nx + L.nz*L.nz));
+  var az = Math.atan2(L.nz, L.nx);
+  var el = THREE.MathUtils.degToRad(8 + (1 - r) * 78);
+  var d  = 3.0;
+
+  key.position.set(Math.cos(az)*Math.cos(el)*d, Math.sin(el)*d, Math.sin(az)*Math.cos(el)*d);
+  key.target.position.set(0, 0.06, 0);
+  key.target.updateMatrixWorld();
+
+  var kelvin = 2700 + (L.warm/100) * 5300;         // warm lamp through to cool north light
+  var col = kelvinToRGB(kelvin);
+  key.color.copy(col);
+  key.intensity = 0.5 + (L.inten/100) * 3.4;
+  key.shadow.radius = 1 + (L.soft/100) * 11;
+
+  fill.position.set(-key.position.x, Math.max(0.7, key.position.y*0.45), -key.position.z);
+  fill.color.set(0xF2F4F8);
+  fill.intensity = (L.bounce/100) * 1.5;
+
+  hemi.intensity = 0.28 + (L.bounce/100) * 0.5;
+
+  // the light puck is the one warm thing in the interface
+  document.getElementById("puck").style.background = "#" + col.getHexString();
+  document.getElementById("padval").textContent = describeDirection(L.nx, L.nz);
+  document.getElementById("wv").textContent = Math.round(kelvin/50)*50 + "K";
+  document.getElementById("iv").textContent = L.inten < 34 ? "dim" : (L.inten < 70 ? "medium" : "strong");
+  document.getElementById("sv").textContent = L.soft < 30 ? "hard edged" : (L.soft < 70 ? "soft" : "very diffuse");
+  document.getElementById("bv").textContent = L.bounce < 15 ? "none" : (L.bounce < 55 ? "low" : "strong");
+
+  needsRender = true;
+  touch();
+}
+
+/* ---------- the plan pad ---------- */
+var pad = document.getElementById("pad"), puck = document.getElementById("puck");
+function setPuckFromEvent(e){
+  var r = pad.getBoundingClientRect();
+  var nx = ((e.clientX - r.left)/r.width)*2 - 1;
+  var nz = ((e.clientY - r.top)/r.height)*2 - 1;
+  var len = Math.sqrt(nx*nx + nz*nz);
+  if(len > 1){ nx /= len; nz /= len; }
+  L.nx = nx; L.nz = nz;
+  puck.style.left = ((nx+1)/2*100) + "%";
+  puck.style.top  = ((nz+1)/2*100) + "%";
+  applyLight();
+}
+var padding = false;
+pad.addEventListener("pointerdown", function(e){
+  padding = true; pad.setPointerCapture(e.pointerId); setPuckFromEvent(e);
+});
+pad.addEventListener("pointermove", function(e){ if(padding) setPuckFromEvent(e); });
+pad.addEventListener("pointerup", function(e){
+  padding = false;
+  try{ pad.releasePointerCapture(e.pointerId); }catch(err){}
+});
+pad.addEventListener("keydown", function(e){
+  var step = 0.08, moved = true;
+  if(e.key === "ArrowLeft") L.nx -= step;
+  else if(e.key === "ArrowRight") L.nx += step;
+  else if(e.key === "ArrowUp") L.nz -= step;
+  else if(e.key === "ArrowDown") L.nz += step;
+  else moved = false;
+  if(moved){
+    e.preventDefault();
+    var len = Math.sqrt(L.nx*L.nx + L.nz*L.nz);
+    if(len > 1){ L.nx /= len; L.nz /= len; }
+    puck.style.left = ((L.nx+1)/2*100) + "%";
+    puck.style.top  = ((L.nz+1)/2*100) + "%";
+    applyLight();
+  }
+});
+
+["warm","inten","soft","bounce"].forEach(function(k){
+  document.getElementById(k === "warm" ? "warm" : k).addEventListener("input", function(e){
+    L[k] = +e.target.value;
+    applyLight();
+  });
+});
+
+/* ============================================================
+   6. PRINT
+   ============================================================ */
+
+document.getElementById("print").addEventListener("click", function(){
+  var wasSelected = selected;
+  select(null);                         // the footprint ring is a tool, not part of the picture
+  renderer.render(scene, camera);
+
+  var w = renderer.domElement.width, h = renderer.domElement.height;
+  var target = 2600;
+  var mult = Math.max(1, Math.min(3, target / Math.max(w, h)));
+  var pw = Math.round(w*mult), ph = Math.round(h*mult);
+
+  var url = null;
+  try{
+    var oldPR = renderer.getPixelRatio();
+    renderer.setPixelRatio(oldPR * mult);
+    renderer.setSize(stage.clientWidth, stage.clientHeight, false);
+    renderer.render(scene, camera);
+    url = composite(renderer.domElement);
+    renderer.setPixelRatio(oldPR);
+    resize();
+    renderer.render(scene, camera);
+  }catch(err){
+    resize();
+    renderer.render(scene, camera);
+    url = composite(renderer.domElement);
+  }
+
+  if(wasSelected) select(wasSelected);
+  openPrintWindow(url);
+});
+
+function composite(glCanvas){
+  var c = document.createElement("canvas");
+  c.width = glCanvas.width; c.height = glCanvas.height;
+  var x = c.getContext("2d");
+  var g = x.createRadialGradient(c.width*0.5, c.height*0.08, 0, c.width*0.5, c.height*0.08, c.height*1.15);
+  g.addColorStop(0, "#F2F2ED"); g.addColorStop(0.55, "#E4E5DE"); g.addColorStop(1, "#D4D6CE");
+  x.fillStyle = g; x.fillRect(0,0,c.width,c.height);
+  x.drawImage(glCanvas, 0, 0);
+  return c.toDataURL("image/png");
+}
+
+function openPrintWindow(dataURL){
+  var title = document.getElementById("title").value.trim() || "Untitled arrangement";
+  var names = props.map(function(p){ return p.userData.def.name; });
+  var counts = {};
+  names.forEach(function(n){ counts[n] = (counts[n]||0)+1; });
+  var listing = Object.keys(counts).map(function(n){
+    return counts[n] > 1 ? n.toLowerCase() + " (" + counts[n] + ")" : n.toLowerCase();
+  }).join(", ") || "no objects";
+  var date = new Date().toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" });
+
+  var w = window.open("", "_blank");
+  if(!w){ alert("Your browser blocked the print window. Allow pop-ups for this page and press Print again."); return; }
+  w.document.write(
+    '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + escapeHTML(title) + '</title>' +
+    '<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600&family=Spectral:ital,wght@0,400;1,400&display=swap" rel="stylesheet">' +
+    '<style>' +
+    '@page{margin:14mm}' +
+    'html,body{margin:0;background:#fff;color:#22252A;font-family:Archivo,system-ui,sans-serif}' +
+    '.sheet{max-width:190mm;margin:0 auto;padding:10mm 0}' +
+    'img{width:100%;height:auto;display:block}' +
+    '.cap{margin-top:7mm;border-top:1px solid #C9C9C0;padding-top:4mm;display:flex;justify-content:space-between;gap:16px;align-items:baseline}' +
+    '.t{font-family:Spectral,Georgia,serif;font-style:italic;font-size:15pt}' +
+    '.m{font-size:7.5pt;letter-spacing:.13em;text-transform:uppercase;color:#6E7580;text-align:right;line-height:1.7}' +
+    '.objs{font-size:8.5pt;color:#6E7580;margin-top:2mm}' +
+    '@media print{.no{display:none}}' +
+    '.no{position:fixed;top:12px;right:12px;background:#22252A;color:#fff;border:0;border-radius:2px;padding:9px 16px;font:600 10px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}' +
+    '</style></head><body>' +
+    '<button class="no" onclick="window.print()">Send to printer</button>' +
+    '<div class="sheet"><img src="' + dataURL + '" alt="' + escapeHTML(title) + '">' +
+    '<div class="cap"><div><div class="t">' + escapeHTML(title) + '</div>' +
+    '<div class="objs">' + escapeHTML(listing) + '</div></div>' +
+    '<div class="m">Surro: Still Life Studio<br>' + date + '</div></div></div>' +
+    '<script>var i=document.images[0];i.complete?setTimeout(function(){window.print()},350):i.onload=function(){setTimeout(function(){window.print()},350)}<\/script>' +
+    '</body></html>'
+  );
+  w.document.close();
+}
+
+function escapeHTML(s){
+  return String(s).replace(/[&<>"]/g, function(c){
+    return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[c];
+  });
+}
+
+/* ============================================================
+   6b. SAVING
+   One shape of data throughout. window.storage when it exists,
+   the browser's own storage otherwise, and a .json file when a
+   student needs the work to travel between machines.
+   ============================================================ */
+
+var Store = (function(){
+  var W = (typeof window !== "undefined" && window.storage) ? window.storage : null;
+  return {
+    get: function(k){
+      if(W) return W.get(k).then(function(r){ return r ? r.value : null; }).catch(function(){ return null; });
+      try{ return Promise.resolve(localStorage.getItem(k)); }catch(e){ return Promise.resolve(null); }
+    },
+    set: function(k, v){
+      if(W) return W.set(k, v).catch(function(){ return null; });
+      try{ localStorage.setItem(k, v); }catch(e){}
+      return Promise.resolve();
+    }
+  };
+})();
+
+var K_CURRENT = "sls:current", K_PLATES = "sls:plates";
+var booted = false, plates = [], saveTimer = null;
+
+function serialize(){
+  return {
+    version: 1,
+    title: document.getElementById("title").value.trim(),
+    saved: new Date().toISOString(),
+    camera: { az:+orbit.az.toFixed(4), el:+orbit.el.toFixed(4), dist:+orbit.dist.toFixed(4) },
+    light:  { nx:+L.nx.toFixed(4), nz:+L.nz.toFixed(4), warm:L.warm, inten:L.inten, soft:L.soft, bounce:L.bounce },
+    objects: props.map(function(p){
+      return { asset:p.userData.def.id,
+               x:+p.position.x.toFixed(4), z:+p.position.z.toFixed(4),
+               ry:+p.rotation.y.toFixed(4), s:+p.scale.x.toFixed(3) };
+    })
+  };
+}
+
+function deserialize(d){
+  if(!d || !Array.isArray(d.objects)) return false;
+  props.slice().forEach(removeProp);
+  placeIndex = 0;
+  document.getElementById("title").value = d.title || "";
+  d.objects.forEach(function(o){
+    var def = null;
+    for(var i=0;i<LIBRARY.length;i++){ if(LIBRARY[i].id === o.asset){ def = LIBRARY[i]; break; } }
+    if(!def) return;                          // a scan that has since left the collection
+    var g = buildMesh(def);
+    g.position.set(o.x||0, 0, o.z||0);
+    g.rotation.y = o.ry||0;
+    var s = o.s || 1; g.scale.set(s, s, s);
+    scene.add(g); props.push(g); placeIndex++;
+  });
+  if(d.light){ ["nx","nz","warm","inten","soft","bounce"].forEach(function(k){
+    if(typeof d.light[k] === "number") L[k] = d.light[k];
+  }); syncLightUI(); }
+  if(d.camera && typeof d.camera.az === "number"){
+    orbit.az = d.camera.az; orbit.el = d.camera.el; orbit.dist = d.camera.dist; placeCamera();
+  }
+  select(null);
+  document.getElementById("hint").style.display = props.length ? "none" : "";
+  needsRender = true;
+  return true;
+}
+
+function syncLightUI(){
+  var p = document.getElementById("puck");
+  p.style.left = ((L.nx+1)/2*100) + "%";
+  p.style.top  = ((L.nz+1)/2*100) + "%";
+  ["warm","inten","soft","bounce"].forEach(function(k){ document.getElementById(k).value = L[k]; });
+  applyLight();
+}
+
+function touch(){
+  if(!booted) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function(){ Store.set(K_CURRENT, JSON.stringify(serialize())); }, 500);
+}
+
+/* ---------- plates ---------- */
+function persistPlates(){ Store.set(K_PLATES, JSON.stringify(plates)); }
+
+function renderPlates(){
+  var el = document.getElementById("plates");
+  el.innerHTML = "";
+  if(!plates.length){
+    var e = document.createElement("p");
+    e.className = "empty";
+    e.textContent = "Nothing saved yet. Arrange something, then press Save this one to keep it.";
+    el.appendChild(e);
+    return;
+  }
+  plates.forEach(function(p, i){
+    var row = document.createElement("div"); row.className = "plate";
+
+    var open = document.createElement("button"); open.className = "plateopen";
+    var n = document.createElement("span"); n.className = "pn"; n.textContent = "Plate " + (i+1);
+    var t = document.createElement("span"); t.className = "pt"; t.textContent = p.title || "Untitled arrangement";
+    var dd = document.createElement("span"); dd.className = "pd";
+    dd.textContent = p.objects.length + " objects, " +
+      new Date(p.saved).toLocaleString(undefined, { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
+    open.appendChild(n); open.appendChild(t); open.appendChild(dd);
+    open.addEventListener("click", function(){ deserialize(p); touch(); });
+
+    var x = document.createElement("button"); x.className = "platex"; x.textContent = "×";
+    x.setAttribute("aria-label", "Remove plate " + (i+1));
+    x.addEventListener("click", function(){ plates.splice(i,1); persistPlates(); renderPlates(); });
+
+    row.appendChild(open); row.appendChild(x);
+    el.appendChild(row);
+  });
+}
+
+document.getElementById("savePlate").addEventListener("click", function(){
+  plates.push(serialize());
+  if(plates.length > 50) plates.shift();
+  persistPlates(); renderPlates();
+});
+
+document.getElementById("clearTable").addEventListener("click", function(){
+  if(!props.length) return;
+  if(!confirm("Remove everything from the table?")) return;
+  props.slice().forEach(removeProp);
+});
+
+document.getElementById("exportBtn").addEventListener("click", function(){
+  var d = serialize();
+  var name = (d.title || "arrangement").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase() || "arrangement";
+  var blob = new Blob([JSON.stringify(d, null, 2)], { type:"application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name + ".json";
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 600);
+});
+
+document.getElementById("importBtn").addEventListener("click", function(){
+  document.getElementById("fileIn").click();
+});
+document.getElementById("fileIn").addEventListener("change", function(e){
+  var f = e.target.files[0];
+  e.target.value = "";
+  if(!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    var ok = false;
+    try{ ok = deserialize(JSON.parse(r.result)); }catch(err){ ok = false; }
+    if(ok) touch();
+    else alert("That file is not an arrangement this can open. Look for a .json saved by Export file.");
+  };
+  r.readAsText(f);
+});
+
+document.getElementById("title").addEventListener("input", touch);
+
+/* ============================================================
+   7. LOOP
+   ============================================================ */
+
+function tick(){
+  requestAnimationFrame(tick);
+  if(needsRender){ renderer.render(scene, camera); needsRender = false; }
+}
+
+resize();
+placeCamera();
+applyLight();
+renderPlates();
+
+Store.get(K_PLATES).then(function(v){
+  if(v){ try{ plates = JSON.parse(v) || []; }catch(e){ plates = []; } }
+  renderPlates();
+});
+
+Store.get(K_CURRENT).then(function(v){
+  var restored = false;
+  if(v){ try{ restored = deserialize(JSON.parse(v)); }catch(e){ restored = false; } }
+  if(!restored){
+    addProp(LIBRARY[5]);   // jug
+    addProp(LIBRARY[0]);   // pear
+    addProp(LIBRARY[1]);   // apple
+    select(null);
+  }
+  document.getElementById("hint").style.display = props.length ? "none" : "";
+  booted = true;
+  needsRender = true;
+});
+
+tick();
+
+})();
+</script>
+</body>
+</html>
