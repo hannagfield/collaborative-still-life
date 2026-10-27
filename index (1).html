@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Surro: Still Life Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEDE8;
+    --paper-2:#E3E3DC;
+    --panel:#F7F7F3;
+    --ink:#22252A;
+    --muted:#6E7580;
+    --rule:#D2D2C9;
+    --accent:#2C3E5C;
+    --shadow:0 1px 2px rgba(34,37,42,.06), 0 8px 24px rgba(34,37,42,.05);
+    --gap:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:14px;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  .label{
+    font-size:10px;
+    font-weight:600;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  button{font-family:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* ---------- shell ---------- */
+  .app{
+    display:grid;
+    grid-template-columns:212px minmax(0,1fr) 236px;
+    grid-template-rows:auto minmax(0,1fr);
+    height:100%;
+    gap:var(--gap);
+    padding:var(--gap);
+  }
+  header{
+    grid-column:1/-1;
+    display:flex;align-items:baseline;gap:18px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--rule);
+  }
+  .wordmark{
+    font-family:"Spectral",Georgia,serif;
+    font-size:19px;font-weight:500;
+    letter-spacing:-.01em;
+    white-space:nowrap;
+  }
+  .wordmark em{font-style:italic;font-weight:400}
+  #title{
+    flex:1;min-width:80px;
+    font-family:"Spectral",Georgia,serif;
+    font-style:italic;font-size:16px;
+    background:transparent;border:0;
+    border-bottom:1px solid transparent;
+    color:var(--ink);padding:2px 0;
+  }
+  #title:hover{border-bottom-color:var(--rule)}
+  #title:focus{outline:none;border-bottom-color:var(--accent)}
+  #title::placeholder{color:#A9AEB4;font-style:italic}
+  .print-btn{
+    background:var(--ink);color:var(--paper);
+    border:0;border-radius:2px;
+    padding:9px 18px;
+    font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  }
+  .print-btn:hover{background:var(--accent)}
+
+  /* ---------- panels ---------- */
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--rule);
+    border-radius:3px;
+    display:flex;flex-direction:column;
+    min-height:0;
+    box-shadow:var(--shadow);
+  }
+  .panel > h2{
+    margin:0;padding:11px 13px 9px;
+    border-bottom:1px solid var(--rule);
+    font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .panel-body{overflow-y:auto;padding:6px;min-height:0}
+
+  /* ---------- library ---------- */
+  .shelf{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+  .item{
+    background:transparent;border:1px solid transparent;border-radius:2px;
+    padding:6px 4px 7px;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+  }
+  .item:hover{background:#fff;border-color:var(--rule)}
+  .item canvas{display:block;width:58px;height:58px}
+  .itemplace{background:transparent;border:0;padding:0;cursor:pointer;display:block}
+  .item .nm{cursor:text}
+  .item .by{font-family:"Spectral",Georgia,serif;font-style:italic;font-size:10.5px;line-height:1.2;cursor:text;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .item .ds{font-size:9px;color:var(--muted);line-height:1.3;cursor:text;max-width:100%}
+  .item .by.empty,.item .ds.empty{color:#C5C9CE}
+  .metain{width:94%;font-family:"Archivo",system-ui,sans-serif;font-size:10px;border:1px solid var(--rule);border-radius:2px;padding:2px 4px;background:#fff;color:var(--ink)}
+  .item .nm{font-family:"Spectral",Georgia,serif;font-size:12.5px;line-height:1.1}
+  .item .acc{font-size:8.5px;letter-spacing:.13em;color:#9AA0A8;font-weight:600}
+
+  /* ---------- saved arrangements ---------- */
+  .col{display:flex;flex-direction:column;gap:var(--gap);min-height:0}
+  .mini{
+    background:transparent;border:1px solid var(--rule);border-radius:2px;
+    padding:4px 8px;font-size:9px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);
+  }
+  .mini:hover{border-color:var(--accent);color:var(--accent)}
+  .bgrow{display:flex;gap:5px}
+  .bgrow .mini{flex:1}
+  .bgopt.on{border-color:var(--accent);color:var(--accent)}
+  .platefoot{display:flex;gap:5px;padding:7px;border-top:1px solid var(--rule)}
+  .platefoot .mini{flex:1}
+  .plate{display:flex;align-items:stretch;gap:2px;border-bottom:1px solid #E6E6DF}
+  .plate:last-child{border-bottom:0}
+  .plateopen{
+    flex:1;min-width:0;background:transparent;border:0;text-align:left;
+    padding:7px 6px;display:flex;flex-direction:column;gap:1px;border-radius:2px;
+  }
+  .plateopen:hover{background:#fff}
+  .pn{font-size:8.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#9AA0A8}
+  .pt{font-family:"Spectral",Georgia,serif;font-size:13px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pd{font-size:9.5px;color:var(--muted)}
+  .platex{background:transparent;border:0;color:#B0B5BC;font-size:15px;line-height:1;padding:0 7px;border-radius:2px}
+  .platex:hover{color:#8C3A2E;background:#FBF3F1}
+  .empty{margin:0;padding:10px 8px;font-size:11px;line-height:1.5;color:var(--muted)}
+
+  /* ---------- viewport ---------- */
+  .stage{
+    position:relative;border-radius:3px;overflow:hidden;
+    border:1px solid var(--rule);
+    background:radial-gradient(120% 95% at 50% 8%, #F2F2ED 0%, #E4E5DE 55%, #D4D6CE 100%);
+    box-shadow:var(--shadow);
+    min-height:0;
+  }
+  .stage canvas{display:block;width:100%;height:100%;touch-action:none}
+  .hint{
+    position:absolute;left:14px;bottom:12px;
+    font-size:11px;color:var(--muted);
+    pointer-events:none;
+    max-width:62%;
+  }
+  .selbar{
+    position:absolute;left:50%;transform:translateX(-50%);bottom:14px;
+    display:none;align-items:center;gap:14px;
+    background:rgba(255,255,255,.94);
+    border:1px solid var(--rule);border-radius:3px;
+    padding:8px 12px;
+    backdrop-filter:blur(6px);
+    box-shadow:var(--shadow);
+  }
+  .selbar.on{display:flex}
+  .selbar .nm{font-family:"Spectral",Georgia,serif;font-size:13px;padding-right:2px}
+  .selbar .grp{display:flex;flex-direction:column;gap:3px}
+  .selbar input[type=range]{width:88px}
+  .rm{
+    background:transparent;border:1px solid var(--rule);border-radius:2px;
+    padding:5px 9px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  }
+  .rm:hover{color:#8C3A2E;border-color:#D8BDB6;background:#FBF3F1}
+
+  /* ---------- light ---------- */
+  .lightbody{padding:13px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+  .pad{
+    position:relative;width:100%;aspect-ratio:1/1;
+    border:1px solid var(--rule);border-radius:2px;
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0%, #fff 34%, transparent 34.5%),
+      var(--panel);
+    cursor:crosshair;touch-action:none;
+  }
+  .pad::after{
+    content:"";position:absolute;inset:0;
+    background:
+      linear-gradient(to right, transparent calc(50% - .5px), var(--rule) calc(50% - .5px), var(--rule) calc(50% + .5px), transparent calc(50% + .5px)),
+      linear-gradient(to bottom, transparent calc(50% - .5px), var(--rule) calc(50% - .5px), var(--rule) calc(50% + .5px), transparent calc(50% + .5px));
+    pointer-events:none;
+  }
+  .pad .tbl{
+    position:absolute;left:33%;top:33%;width:34%;height:34%;
+    border:1px dashed #C3C4BB;border-radius:50%;pointer-events:none;
+  }
+  .puck{
+    position:absolute;width:15px;height:15px;border-radius:50%;
+    transform:translate(-50%,-50%);
+    background:#E9C27A;border:1.5px solid rgba(34,37,42,.35);
+    box-shadow:0 0 0 5px rgba(233,194,122,.22);
+    pointer-events:none;
+  }
+  .row{display:flex;flex-direction:column;gap:5px}
+  .row .top{display:flex;justify-content:space-between;align-items:baseline}
+  .row .val{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:2px;
+    background:var(--rule);border-radius:2px;outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+    background:var(--panel);border:1.5px solid var(--ink);cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:12px;height:12px;border-radius:50%;
+    background:var(--panel);border:1.5px solid var(--ink);cursor:pointer;
+  }
+  .note{font-size:10.5px;line-height:1.45;color:var(--muted);border-top:1px solid var(--rule);padding-top:10px}
+
+  @media (max-width:900px){
+    body{overflow:auto}
+    .app{grid-template-columns:1fr;grid-template-rows:auto auto 56vh auto;height:auto;min-height:100%}
+    header{flex-wrap:wrap;gap:10px}
+    .shelf{grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
+    .panel-body{max-height:200px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="wordmark">Surro<em>: Still Life Studio</em></div>
+    <input id="title" placeholder="Untitled arrangement" aria-label="Title of this arrangement" />
+    <button class="print-btn" id="print">Print</button>
+  </header>
+
+  <div class="col">
+    <section class="panel" aria-label="Scan library" style="flex:1 1 auto;min-height:0">
+      <h2>Collection <span id="count" style="letter-spacing:.06em">10</span></h2>
+      <div class="panel-body"><div class="shelf" id="shelf"></div></div>
+    </section>
+    <section class="panel" aria-label="Saved arrangements" style="flex:0 1 auto;max-height:46%">
+      <h2>Plates <button class="mini" id="savePlate">Save this one</button></h2>
+      <div class="panel-body" id="plates"></div>
+      <div class="platefoot">
+        <button class="mini" id="clearTable">Clear table</button>
+        <button class="mini" id="exportBtn">Export file</button>
+        <button class="mini" id="importBtn">Open file</button>
+        <input type="file" id="fileIn" accept="application/json,.json" hidden>
+      </div>
+    </section>
+  </div>
+
+  <section class="stage" id="stage">
+    <div class="hint" id="hint">Click an object in the collection to set it on the table. Drag to move it, drag the background to walk around, shift-drag or arrow keys to pan.</div>
+    <div class="selbar" id="selbar">
+      <span class="nm" id="selname">—</span>
+      <div class="grp"><span class="label">Turn</span><input type="range" id="rot" min="0" max="360" value="0" aria-label="Turn selected object"></div>
+      <div class="grp"><span class="label">Size</span><input type="range" id="scl" min="10" max="400" value="100" aria-label="Resize selected object"></div>
+      <button class="rm" id="rm">remove</button>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="Lighting">
+    <h2>The light</h2>
+    <div class="lightbody">
+      <div class="row">
+        <span class="label">Where the window is</span>
+        <div class="pad" id="pad" tabindex="0" role="application" aria-label="Drag to place the light around the table">
+          <div class="tbl"></div>
+          <div class="puck" id="puck" style="left:32%;top:30%"></div>
+        </div>
+        <span class="val" id="padval">side light, from the left</span>
+      </div>
+      <div class="row">
+        <div class="top"><span class="label">Warmth</span><span class="val" id="wv">5200K</span></div>
+        <input type="range" id="warm" min="0" max="100" value="46" aria-label="Light warmth">
+      </div>
+      <div class="row">
+        <div class="top"><span class="label">Strength</span><span class="val" id="iv">medium</span></div>
+        <input type="range" id="inten" min="10" max="100" value="58" aria-label="Light strength">
+      </div>
+      <div class="row">
+        <div class="top"><span class="label">Softness</span><span class="val" id="sv">soft</span></div>
+        <input type="range" id="soft" min="0" max="100" value="45" aria-label="Shadow softness">
+      </div>
+      <div class="row">
+        <div class="top"><span class="label">Bounce card</span><span class="val" id="bv">low</span></div>
+        <input type="range" id="bounce" min="0" max="100" value="26" aria-label="Fill light from bounce card">
+      </div>
+      <div class="row">
+        <span class="label">Backdrop</span>
+        <div class="bgrow">
+          <button class="mini bgopt" id="bgPaper">Paper</button>
+          <button class="mini bgopt" id="bgGrey">50% Grey</button>
+          <button class="mini bgopt" id="bgBlack">Black</button>
+        </div>
+      </div>
+      <p class="note">A bounce card is a white board on the shadow side. It throws light back into the darks without adding a second shadow.</p>
+      <div class="row" style="border-top:1px solid var(--rule);padding-top:12px">
+        <div class="top"><span class="label">The room</span><button class="mini" id="envToggle">Show</button></div>
+        <div class="top"><span class="label" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10.5px">Room size</span><span class="val" id="envsv">4&times;</span></div>
+        <input type="range" id="envScale" min="150" max="900" value="400" aria-label="Room size" disabled>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   1. THE COLLECTION
+   Stand-in props built from lathe profiles, the way a vessel
+   typology drawing works. Swap these for loaded .glb scans by
+   replacing buildMesh() with a GLTFLoader call.
+   ============================================================ */
+
+var LIBRARY = [
+  { id:"pear",    acc:"SL 001", name:"Pear",        color:0x9AA05C, rough:0.72, metal:0.0,
+    profile:[[0,0],[.028,.002],[.040,.014],[.045,.030],[.043,.046],[.036,.060],[.026,.072],[.019,.084],[.015,.095],[.012,.103],[.006,.108],[0,.110]] },
+  { id:"apple",   acc:"SL 002", name:"Apple",       color:0xC24E32, rough:0.58, metal:0.0, skin:"cezanne",
+    profile:[[0,.010],[.014,.002],[.026,.004],[.036,.012],[.042,.026],[.043,.040],[.040,.052],[.033,.062],[.024,.069],[.014,.073],[.008,.071],[.004,.065],[0,.058]] },
+  { id:"egg",     acc:"SL 003", name:"Egg",         color:0xE8DFCF, rough:0.62, metal:0.0,
+    profile:[[0,0],[.012,.002],[.019,.010],[.022,.024],[.021,.040],[.016,.052],[.009,.058],[0,.060]] },
+  { id:"bowl",    acc:"SL 004", name:"Bowl",        color:0x7C8B93, rough:0.30, metal:0.0, open:true,
+    profile:[[0,0],[.030,0],[.055,.010],[.078,.035],[.090,.070],[.086,.070],[.074,.038],[.052,.014],[.026,.006],[0,.006]] },
+  { id:"cup",     acc:"SL 005", name:"Cup",         color:0xEDEAE2, rough:0.28, metal:0.0, open:true, handle:{r:.030,t:.005,y:.052,x:.036},
+    profile:[[0,0],[.028,0],[.032,.004],[.034,.085],[.034,.090],[.030,.090],[.029,.008],[.024,.005],[0,.005]] },
+  { id:"jug",     acc:"SL 006", name:"Jug",         color:0xC2B49A, rough:0.35, metal:0.0, open:true, handle:{r:.048,t:.008,y:.115,x:.062},
+    profile:[[0,0],[.045,0],[.048,.006],[.055,.050],[.058,.090],[.050,.130],[.038,.160],[.036,.185],[.040,.198],[.036,.200],[.032,.186],[.033,.160],[.045,.130],[.052,.090],[.048,.050],[.040,.008],[0,.008]] },
+  { id:"bottle",  acc:"SL 007", name:"Bottle",      color:0x3E5B4A, rough:0.16, metal:0.0,
+    profile:[[0,0],[.038,0],[.040,.005],[.040,.150],[.038,.165],[.030,.190],[.018,.215],[.014,.235],[.014,.268],[.017,.275],[.017,.280],[0,.280]] },
+  { id:"candle",  acc:"SL 008", name:"Candlestick", color:0x8C7A5E, rough:0.24, metal:0.75,
+    profile:[[0,0],[.040,0],[.042,.006],[.030,.012],[.014,.020],[.010,.040],[.012,.120],[.010,.140],[.022,.150],[.026,.160],[.020,.166],[.012,.170],[.010,.175],[.010,.220],[0,.220]] },
+  { id:"plate",   acc:"SL 009", name:"Plate",       color:0xE4E0D6, rough:0.26, metal:0.0, open:true,
+    profile:[[0,0],[.060,.001],[.085,.008],[.105,.020],[.110,.024],[.106,.024],[.086,.014],[.058,.006],[0,.005]] },
+  { id:"book",    acc:"SL 010", name:"Book",        color:0x6B5344, rough:0.80, metal:0.0,
+    box:[.155,.034,.215] },
+  { id:"allium-flower", acc:"SCAN 001", name:"Allium Flower", scan:true,
+    glb:"Purple-Allium-Flower.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADUAAABgCAYAAAC9pTo0AAADC0lEQVR42u2cUXLEIAiGcxZn+tJX7vTfiTt5qLYzfUhtFFDEZNcHZzs73SSfIIJAjvTxeSwY9D3w+0ne148G+fnk75GLwZ5wUUBXIDUw+v0bvaCzYaAEqg3cCYpOs58dhklys6STJ45wqBwwKAqKg4DyyZDQbKgcOFgyJE9ZRyYL6aV6LwW1EubKGyEPKL4B1D/L+CQD8bZQeDX1g5eheDv1g/NGq/YJZ0PxIAwbfzMMRc4zXU4Iej34WZI6xz+PMxQQwgNUgNn4sKaQxCPC5eLmrLy5Fka6Ls9waKmQzNFYI2TwG7kwNoiEqp3pQQjBycm8Iy04TbJ4IiRcgzXnFStOZ6+sp/akiIo97NZQXhrwaKhjQ22oDbWhNtSG2lAbakNtqA21od4YiqQI9olQGKlq2VAbakNtqNtBkRHqEeWmMEIdrwSVN5RBxVf7fZgxcZGG4crvQyfQFKgyqUaB5jx7QpW5oXPulo0qIkFhZBuwzCpXblaTFhr5Ycmc88g20MrZskJ/0UgoXyWfuYCixnqr3U9V7XxOPMOojmjkbHEhXSoy7jxjUx6tn5CSyz115rwCii/qw6mihprKFjiZ+m4oLkpxqFIXQcbCYVfPfaQKk5SHKZZiKRd/sBcIhpACyVZYxRFQLNUCVX5jlVb2iq96ChUtvh0Z65A4IvRgwVKhqBLDhdpZ1JAioCQrJS38856D5NDwNQpVUz0kWw/GWa2m9CBaoHBxw5GaWEpO7XneULdoz/OEimqBwCyoyNLrEEkh2UpBw1teeyJfy6bIC6BI+j/tgyJIRdkY+pjWlKaquFY/PltSokHRxk7a2SJnKDSaWXjETSLBWfVUSzZeo9tLb4Gi0vIw0mLEo2uw9/0S3OiyQXC/4r8++pHGShbUDim2ubmr1YiS7n0sSA9ptCSjG0ML22WPGUCr+4CPmUAeYGWzv8Y6knb3Hj0Q8XaXWup9zJZSj7Qo2ZN3fyZDm5eKemXKSKqVLZFv5CtTXPLO0kN4V6MsPyLzks55cNK3l98OCsrBle+HNOQLB7u6q8onClAAAAAASUVORK5CYII=", targetHeight:0.16, previewSize:[0.52,1.0] },
+  { id:"tall-cactus", acc:"SCAN 002", name:"Tall Cactus", scan:true,
+    glb:"Tall%20Cactus.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAABgCAYAAAB1ydDiAAABuUlEQVR42u2bMY4DIQxFOUukbbb1nXwn38mH2iZZzSRkMDD4/4LCUppMnr6/bSZAefz8lsHQQ9jhs0w8s/R+QZ4/7oGQ1UBRkCmonvT4YNgKIJsA8h5vrVbnGLcodBeM36HQnTBhlbKBbAZINlADyBYA+SiQLIJpVlu2Oq8m2Q3kTEC6GMh6gCRBIe9VyBNCehSyBCDtAcpQyJhMTQnkjEDK5KGvaUPBfFUJkaowkG+FKtXGAHQaJUhDH6vtAwipzslLDAqdXrUZYLxmagMD8XuosKSNJWX/w5YlZVWFjMnUyPK3qwUaTR96KaRolbL+YAj3IqZZdgJiKHl5V8jYRkdh6EWol8Tm6EB7yd5NjVZHmUZHdbgymFrZgJzJ1FUg3UAND+0qi4wOtIdkV1lPynSburHIR5c+dHsqPFyRa2tlS5mwpYzOQ4bengot0IRNIWVrjPBtKsTZj8v9DsTZj25TGxMQfOJnHogbHh0oHzWBlGHaoyuNxkOGPDYY3utApk3ZgBx19HSqypSpyhAKWcRDxuSh7LSFgIRplmWmLdwYM1QSxEWT2kaLZN4NstGbVCO3p/Qiymz8Acw4G1nX3jVeAAAAAElFTkSuQmCC", targetHeight:0.32, previewSize:[0.37,1.0] },
+  { id:"kitch-flower-sculpture", acc:"SCAN 003", name:"Kitch Flower Sculpture", scan:true,
+    glb:"Kitch%20Flower%20Sculpture.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAABgCAYAAABSZ1EKAAACwElEQVR42u2cUY7EIAiGPUuTfdlX7sSduJOH2skmmzgda0FAxe0Db632K4I/1Jl0fH2nxQxPJrp/FQh4Gb0sVwwY0OgBBMXgILjvCuTP8DRH7RryAKpNAkqY0kPAuCZ5L5cWGNyAlPcRB8YKKDMMhTDAvBY9kkIWLJsyqDnehBsPumQ5ztLhvAQSjIveaVsyOTJgUBiPb0BlLqdWju+EosocrSVJUq+cgYCZPok5aO6wlleQ+TI/lhwJHqC1eWInFBek5YAk3VOuJr5bUhKrxQkwxgZOUqgNUsYaGXnj6gWJw0CqgqkymAdUdyxrhSgNeni24LWuY6wBYVY9hMbZDXqfxcsb3IA2LxatC7ukEZarAN15chjMDCB0ns8dqKbZwgIN9443kHpPqTRUcCUgLUyeCYRGme2s/kELBBPjB3u8zFk21AGWlUDUqGxVQNRRgidFGU2MUl0FhJ39Bak6QEVJLk4KPRNJ3i635DDbh+iQNzW47WCyross271lArlT2ND5osyAwLikllzvJn1GN0NghJbDASA4WpyCg7fISo17frlzbYaM6vpIAMPVQ7Ab0F0SCQmU/hMQHrJm5vmTDUUBAs1+tRoQaSWRtvXL2Uu4D2WS8qUPLz3+khh6DS01nrV2q4FZyqOhBd7Vl7dhMJIYwsGlQ3cZsWL5kHuPZ2rSNq1WNljsQzi7mPPaWMvgrx14Cgek8eQD9AA9QPps+AA9QAM7P3klpcCpoXoVOq6iFDzFqusBwBlHM9kH0WcpbZcaKSJMEyoqjElfLi9oIXsKD9ADtAPQikmBdgNS70O4+nKLvrGqgGinGKJFM1wVKjJMVdNFh2H/Wh8DwbB+JZkDGl0BYVCgXy9Fj50PL+0GlHdbcnmXhNAEepbc6kBptywX2UtbaLm3wxszDp1LP6vgIfg7Ao9vQhIT/1/Cnf0AuxjwoDkcGeMAAAAASUVORK5CYII=", targetHeight:0.15, previewSize:[0.52,1.0] },
+  { id:"hand", acc:"SCAN 004", name:"Hand", scan:true,
+    glb:"hand.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABaCAYAAABHeVPzAAAC8ElEQVR42u1dMZLDMAj0WzJzzbX8iT/xpzzqUiRzvhtPItuwgLWFilSRd9EiCQTL7et7mXDIY+hzSOZcZgTeHuO+MZQE5AD/fwgJ8B2jwK+HkYDzQw8AD18Ns8vN6GoQEoAHHuKkZ9b5EquBOp+8GjrLzT15TEuAFQB/SgKkCPDTESCFrN79jEDgkx0xdzYkoB3wlyOgG/CujjgT9M7A77k1ffkyzSagulP1JmHrew1NgFzE0kd9wsjK/nOfRF1PXjXU9GQSKC3JskVHmryNpaYXliDKDOAkTYtPPkVXDnhMtw2lg02IJVSNNk0hP2sCzPEoLtzO7icg405cScA+Arzz6bkCngTIG08d9YBB6AN+CdAN0GdKLylFwELwsbHktRbT8hPyidYrQAk+PpC/vnSLeoTAe6UPBDAsmRjAp9wkJ3NdNXW8hQP2JIBWfzCTjlqfnMDFTLfkZF5KTkMCaPWOmdQEvxEBBD8gcEW9L04AwQ9+UUnJSX7KRKtPfsZEq09+Tel5pfCKJ5PEHS/qPax/q4YOSRiMs69/eBYvkmYavc55EpT8nJGgkfhxZ21WhPVvZUd7leyyrrsSRwOy24GX8nrUmTS5ot5TD1Sj5WfPOWAU/PtFwPcgwKVWxGiukHTeCgbJKKxYh10Q/AUhPx4hyftFwV9Q/7skTbA6+BD9P0OAXczhehKg0QSY08lTgoj1Kj0PWXlozZcqu49AAkJKlnlYvVRyfkHzMG8CBCwJVgT8BaH/IwQgSzsKyvEFEuBaNVHBjjDb6Z79dqtCAPLYH9VsR1ES6DmJo90ltBj4R789pHBrtAOUguAfIUCiCJBAIKTAXt+DgFPGcOYdQBb4qE53kB3Y0fqgZ0Gw4uAvqDl16gGD7noKkcMupeozWs4qYl4dmvBYAvij823VP8AaWf+IDLXroNEN/E/FrFq1sUKdqhHzd5XEitpvhYC/RENnbSQ5UxMwHfhVJMhmBB7thAUYySIBt/f9CJTA/44fjRSUUnQh8PEAAAAASUVORK5CYII=", targetHeight:0.05, previewSize:[0.92,0.25] },
+  { id:"mouse", acc:"SCAN 005", name:"Mouse", scan:true,
+    glb:"Logi-MX-Master-Mouse.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAAlCAYAAAC9DeznAAABAElEQVR42u2bsQ3DMAwENUuANG61k3bSTh7KTZJOUAyLfpK+4rsgAf74L9qOy+u9FcdqA5Us8mz8PlH/fK4CYJ3p/Q/jRwoJI8q0n1WPUlWqH65Gxo+SAYBFNXM1FfWJAJSmu4cRrdvTVZRVv/cg5ssTsfoLoxkvB7Fy6vdEapEA9GTm3wqCqRfXElMvBvGEDcd1LVE54jRQOddBmAPA/LmqFQDMN04D5ovTgPniNLBmitPAmimGgPniSqLzxRAiPblKeQUNAPG5AAAxBACIIbABiW9tfw8DzBAmgDVUuJZG+xNVykMYABoVADh4rnzmtaCZOEcWAfD8blhLMiA/AAdCkqx3kRozOQAAAABJRU5ErkJggg==", targetHeight:0.05, previewSize:[0.75,0.32] },
+  { id:"crocodile", acc:"MOD 001", name:"Crocodile", scan:true,
+    glb:"Crocodile.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAAbCAYAAACDfYo6AAABAUlEQVR42u2aSw6DMAxEc5ZK3XTrO/lOvpMPVVUKIqKUhKjYIZ7FrIF58Tekx/OVgooKub1HZDO4UHgAHxMky+qZmoUIyADU+DQuABIArADIMOUBgONpXIALAKwApHJiuVEtUSQOKc8EAJ0whIviqxdqD5LOBGD7UXcTe3ZC0cyuSaxng9aUIhOb7grn10CkUHd9OQ1g9rQydNQkmOQbOQDgk652awDS0P+Npp4uiAyHpLubbDYHUMAI6VlxmE3CPFn3JF4T8RWXKket2GjgsA0tdvNysOGUzt6bK+tvBgDf+wAA2OznrQHgRgx3wmMBEADwA2D9j44UBTs8gCjQv/QG50BkAp9vIK0AAAAASUVORK5CYII=", targetHeight:0.047, previewSize:[1.0,0.15] },
+  { id:"20-die-lou", acc:"SCAN 006", name:"20 Die Lou", scan:true,
+    glb:"20%20Die%20Lou.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABQCAYAAADm4nCVAAAB5ElEQVR42u2dy20DMQwFXYuAXHLdntSTenJRQQ4BAsN24vVK87SaA48GDM4jqdWHvJSPz0ug1RvbQv/n25b2h74dff2ntTugpoOVpPj2gvOPsB9gywLYAKc/i6ZlANQQpz+KilMC2MIdf2vbmQC0iRw/PC2tmmpiouHsxTUegukGhqDzYQg6H4ag82EII/duhNABwHVxQwFUAbz/sab6YQiqH4ag+uGirPphCKofhqD64Xqg+mEIqh+GoPphCKofhqD6YQiqH77yovrh3VP3++FU5GkX/KWs+uEosPjCtcDiC6+IVD8cBRZfOAosvnAUqH54Sar64TSk+oMAqH4YgEtPGIAOAQGofhiAzgC/Ayy+MADTD7wVIQDwYEYAAbuhAoDPAwQAngu7Cgo5E3YTLuBWhBCAy1nuhsLXEz2QCbyaKISBN6RXaro05e1oIXTuK+H7AFD9r7yQsS50ejtsbyC4rY0PtcH0U3a2KrAwH9jUyT5xk7wTFkKnxh12TJyoVYEQOrStsXHrRN1ShHCw+ovNu8ev+8uA9vXN1MPPDzD1OEEjO/WMALBSSto9fSlxQt4Sjh8N4GzR0EpI+/rZouH3zMm287dxEzSSJy39NS/y3v+oZeCcyYQhno9CvO60qaapfgF43hW3NwUpQgAAAABJRU5ErkJggg==", targetHeight:0.038, previewSize:[1.0,0.84] },
+  { id:"catcher-helmet", acc:"SCAN 007", name:"Catcher Helmet", scan:true,
+    glb:"Baseball%20Catcher%20Helmet.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAAnCAYAAADwxU3sAAABc0lEQVR42u2bSQrDMAxFfZZAN93qTrqT7qRDtYUEhEliJ2miwVoISlfmP+lLHlKm17s4CvgGbkTxGF4W+hOYO4JmSAngjxnPJ4K8VIXlxdFJ8V1VRGTxZSSAmy3HrSV5bLRXQZiypaiW0wMhAcyZ+KT45iBEt5ythrxAh1EBgJL4VNnekAC0xOdqEuIRLUhTfFkBYGUsHUl8Fr5PAsJadYQEQEYAsFgLidNUlcko+sTTmoTqdXJEAGBM/CXj6z6gMpqOlv0oMh3Ef6R1ZjSi/Ui/r4+s8WkbGhVAqaaiEhmAtR7AVVLIHkARARSDANYsCcTvBKCwL8BswnZgJIBRIKQF9Z2c5lGE4sFdCADgMPtDAfBYBTAFvJDxBCDkjRhmBejfCVNWQR8A+Ra/tYM88k4fnO8H9r5RwKNVXqotODoeGV1GSRH0AdBGGcFONVCK13Xt2YyjE8wZP0QnwPBChNwJ00V4reYoKz0fZnWIclsWasYHUylDpj/uPX0AAAAASUVORK5CYII=", targetHeight:0.115, previewSize:[1.0,0.41] },
+  { id:"usb-cable", acc:"SCAN 008", name:"USB Cable", scan:true,
+    glb:"Belkin%20USB-A%20To%20USB-C.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAAxCAYAAAAlSqxqAAADRUlEQVR42u1bSY7jMAz0Wwz0Za78E//EP+VRgwGmgbRbErci5QQ56JJFlquo4iYd59ef4zNKB08G/fv+A1DNoP8gP5RxvJolrV6GF5/Js9VtXOOv9b2LJXmHFJAhgXXwHbVSCgBf7RqEkUjUCO4AeiXgYpjfuxsoue4fpHfKCBfJiTbossOiu0GAayklYAfImoV3+Zbrc1XHv8tJjuJiWUQ0EnCwP8I95R0eiXdIYVjleMS5zWnym2/riVg7GwkYSQx1+UEU8M/bjQegk8MCOWCdM0fqjXYEGB3BCRDlxb3Ar+a1RhlaBMNOQOmuBIjiaKKxtTQkUh4Zivy+nAApSmo882Y02Qsod/oBBEgcdOIdWeozoIcxF2n1AxmQOBFBrbJWdNEsm0CVFvEsWxdtmaYMsSg3EcP6qbGAd3iyWcQCpOiltISQE37jGpFBibAChaoaaiUCRDFvlJMQwHFTRbKmLQDJNkJySAF9ZkiRtVqydqogQMCx8LPlRAilhSRyUVL1MM6dJkGTHqTsyJnvE8jpLytQcM1WZy0oAmjQxKATV5a2dMNQVccMOJ7yhWQNdTZZll1ZaD4pgAvA6WeA8fyXs0HK1WJosBABJD6cbVwUWTCqdpQmgCcPZUMjhR0NdUE1MoqKaRHyIARok0Tbd3I2lnYBdZwIeWkCPOEaTY7YcUOJ4SiOSiSRtKUIyGomTY6ASCP4GemhhL9Ll64Rk8ilboIuJ1c6Xk4aDCQMzRAwkq/WjlJQehgklZBELCNBo+ipmwDr8whcZIR0zrIEjP7XKT+a46TFqemdDv8tCJg5TirsZ2QjpiUB8kIE0EV6SKklVTh8SJQXOUGm6W81AaScwuPCPi6hfVz0BNnMGqoPNvGOxvnA4OAtyWgThiZn8Rlocbwo8HVm2lKRYGqHYzPnRasubey4SCJV2T2yzcaByqf3tgm9E/ijliSi15k5CLUi4+3AnzXlCRA7j6ISMTZiLDdcOsob0vF8j657OlecsNw7gN/2fMQVJEtnjALyxRslp438zI1HxB3dFWm7JOfWV5S83bLMfVopzmpnUtvq7HdZ2AxodhITJYeSN3tejgDUzkJehd0K/CsRYJU7OZvv+CLGX+/luWbVWJVDAAAAAElFTkSuQmCC", targetHeight:0.019, previewSize:[1.0,0.09] },
+  { id:"bird-s-nest", acc:"SCAN 009", name:"Bird's Nest", scan:true,
+    glb:"Bird%E2%80%99s%20Nest.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAAuCAYAAADXyhwkAAABXUlEQVR42u2cSw7CMAxEexYkNmx9p9wpd8qhYAFSFfWTNGnGtG8xEgsqYMa/ODbT4/mabgD7IMzg5rt5JSx9cZQwy4hPGUqEQoAMYcGKf6/jyjNryAWKG59pVxcg/5FWSeYImDcB9iwjXRBuBLCVsJAujnleiAoB7kByiQCxp0dAfntYspZk3VKVgA4Ju/SNEWKrBDA8QIvYSwBi/8llK5YvzgM1NT844dBWe/ACHeM/Sdi5B2D5giQcGlq8oIMAEDe4EqLmF4uA9Y+pimxPAOK9KCcQejQXOgjgxQsQQOwFCCBuUSCAMP4jgINTMQIIrR8BHLSnEUDcmqANIfYGev/inhCzP+I8wACWg3MA15COBMALBAcxpiCEt2KMJDr1AHJB/wrIaueCyAXn3gdbyWAWImyTGxaQr8CyoNFIqHRR2y5ak4cRS9g9p6OP/icDJDvclO81fxr/heQtvAE8bgoMB47KjgAAAABJRU5ErkJggg==", targetHeight:0.072, previewSize:[1.0,0.48] },
+  { id:"black-heel-shoe", acc:"SCAN 010", name:"Black Heel Shoe", scan:true,
+    glb:"Black%20Heel%20Shoe.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAABgCAYAAAB7YK6NAAAC2klEQVR42u3dSU4EMQwF0DpLSWzY+k6+k++UQwESoKbpylSO4zh/4RVT6SX9M5Y4zrf3A1Us+iz+LtL6vYCtqy/09FAMfNuen56KgD+n53+VAN+m0kUJ8G0j52fQlbsNANz2yHnMerkzBgC3XPKEf/V1Af74WU5uTBDg28/vuWcNAOC2yKHKGREBX3+KqfW9wO+YYrbgC/DHTDFrF2IM/PGR82p8KDYakHUiJ7cFcdkAgNbbQk6te0CAvj/FrMF/2YCAVpo2VuAn4LdHjnT8TFXvB3Y5clgRX4DfFh+kFDn/ogfY5R58KOMz8PXwCfhjIkdzsP3XoADP4/MgfAK+fd7/aVSgA9913nMm+xn44/KeCoMv8AdGTunaSAL+GPyaayPAH4RfmvPTDXxMNRt7MGnmPfDr8Ul7sAV+3xEgZQ7Lga9wH/Nqi4FvoAO/8+z1bm8HvvIqFfgGsQN8J9NN4C8eP8CfGD3AR+b7u6MD/MDwwFeA58qX44CvBC9K44jsit87uJJyI2+HT4N7e0v8bIcvBr29dtW8Ff4MeOA3xo2cNvtFW+DPhN8eXyZETc3fD4/Pk+FzzxAan3qW+8C3j5sZn76wN9bYSa/fEj8Bf43F1AH8eXs3s54pHL7lptnd5wqF37NHz5Hx+UV52qMPh89n/5FcTWnePDii4Ftfv9ComesONfwV4SUC/orwlnk/FF+A34UvGvhp0fKw13RYz2yAr4SPyJmIn4Bvg//4H9LSwr3eOnJyHfXIIa8M7GF+X1zlar3Yi8jpxOcN0GdGThZfNoFnj/g79Hw5/R30bINPXvEPxM1cfEHcmB9z8upbw15nN1XbyhH2arzmfBM+Iefn4Ufq/Stc6OIox4Je4yZ7mhXtkIRPn5e6qmJn5fghp/BXiUIRTqrEOfxz7/993poWE6CPqZaPjQB9Dn7uAqwVOEdBH/FCnEZjiMGt5pD4pU/J1Y1kio58VR90bPjnf/ShJgAAAABJRU5ErkJggg==", targetHeight:0.24, previewSize:[0.99,1.0] },
+  { id:"blue-cloth", acc:"SCAN 011", name:"Blue Cloth", scan:true,
+    glb:"Blue%20Cloth.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABCCAYAAACo/NMFAAAB3ElEQVR42u2cu5HDMAxEVYtnnFyKntATe1JR58BONPqQEvHfYEOP7H0gQIIyltf7b3Ei+oi/WqrIyxdpH60bEQDoRf66IwYAHa0nAgBh8QWAtlkpRyvoyfN5Qs3iiACuzF8760L7ii5M7n1G6zD97PMcAcAd87cQ6KB4zxAPmn4EkjMC0BJPBtwAwF7NCwDJ9BEKgvdtaFaRFwBUFABH3YYCwIRDDxc3Xx0AFTfbFADD7PM+F6LeeCeEqDc+DwCAcRpC+jEuxppXjJAiAKShzkKMHk/CXRAADHREUQMStqNh/sC9Nsw3NH82AOz/b7wtAfON7oJnAsCe//57RssT05HvH5o/AgC3WALmXwEgmC5r/h4ARLqi+T8AhHw+/6pxBAAiXvCg1bsCYJ7QQau3BmAVKOX8syIMM5WiHgAcGA8ABukGAJxEPQA4BYDDmDEArAIHAHAoMwaw15hDajICgH+5KExvkZr5U77LaQUg866KowHIBoEiAshyid8ipqBMq4IyAYgGQXR0GsYUGEa/NYAIEMQnN3oeW5m28HoE4BECVQPg6eWApvWbPc7SpCrmewWwVDHfM4CWNedHAcAVzK8O4DdY1XRKu+fB1k3IcAzvvnnJM9JRZQ/R3aN/GNyFzrlvDGYAAAAASUVORK5CYII=", targetHeight:0.11, previewSize:[1.0,0.28] },
+  { id:"buck-skull", acc:"SCAN 012", name:"Buck Skull", scan:true,
+    glb:"Buck%20Skull.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAAABgCAYAAACZvLX0AAAC/0lEQVR42u3cSXLEIAwFUM6Sqmyy1Z10J93Jh8qmU+VyEBZiMEZ/4VXGfv0tBIZOX98/qfKiz1XzM3y6yPE3X3t5fuj4QFneCPl8/98VCtcDzAbgHKxExK0FphOYFdaadgCf8LjwNaTWCUyXRPKlZORwEy47cG6wEgWXAFsHzJl0RkotjwY+DNfOA5m03Jm16Y04kFFF+eNa4DvcKLWUjchHDTADVx3oyTrL9aQ3cgt21y2ZgdHf2ly0N+AWGLi2FIvyNSoBMyYQ5q7i6vJvMcwyawPuvVEunFlgQmlwpViswEivP8V0qcOcA0Z621OsAucGN0DWpZhLwHgSUd8T090CWGlwQ+2974dL6+LHGVhQHtxP18kCjPLgn9GlQoqTVh4AXAdMJWBG/W3qILhUZtGe9QNmAI8pEVxqdQHcnmAB8PjFd202DGAAvwuYcsDog9uBtYGOS8/ggNgRGJONPsCsAeNR0WDghCfJXYClBMxIsftphrZseftMDsi2DShqOLHppA+wambdeAJk59Zey+NoINdvTKe7zX9A9gOLdX+wBD420FIeqo4QCJLcZtL6C6O1cNWls+uIGRhXepxVjnycS6x9bwuw5Q9JoNR2T3ANMm0AK624XuCmW2YjWNNrHDmbeVPJ4EpY8+ua9Y7zBml1hWbmKCuLQLMD1R2UJ0bcpxLdAuseuJ/qGWcNiNQI2/y/rZSWnqDcoRR0uctWui1n3/bXsWHIXbTSVLO2znEH1KU+N21WmuVym2vpkpmD1U7AFvjlYd8I7B2sHp2yr7js1wv2VZ/899SEBMCDNm0AeNH0LrcWvVtyl1se3bGLkKjAs9szAHdO7ZJnTHYpD6JsigZwx0s7pA3gznWXATwWGAmeNNBxtC5CIrZqu66mhQWmicD0FXQ1jaPg7rpcGXYtYlYtTgAeVyYYwGPLRALwOGAG8FjgBOBxNVgAPHbCQQDWt5rKrul9GrhXPSYAjwF+xYfnATgIcALwep0FgAceDnzNofOVzwyzcr3qDPQv18un0BpDnPAAAAAASUVORK5CYII=", targetHeight:0.45, previewSize:[0.92,1.0] },
+  { id:"cast-iron-teapot", acc:"SCAN 013", name:"Cast Iron Teapot", scan:true,
+    glb:"Cast%20Iron%20Teapot%20.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABSCAYAAACrKtGeAAACpUlEQVR42u2dS47EIAxEc5aRZjPbuhN38p1yqOl1Kyh8ytgktfCyO8LPlE2C4fj5/Ts2MHysDFj6sWV3tn3sdLA0gLI5/QwyiwLydseHw4h0vCVzfA0GngRgF8dfGXYHYKTEWcgVVeiMWBX1Ixq8Oin2VF00ECsG1epwbFiRWVYAyJDgFuYsZAIA76hJCsIyAMDmET8rqd1jXFXplM0d31vRIQKArayfN5AlrARgD9F69mzACgBvdn5L7oMngBr944U2BMHjgXgpgCEIMw87JT1dEIwJoEh6OOrAjP4ix98GqTEAQNE/VaRgFkBR9E8Fa5kFIPmZ9xcdgBzdpxgQgCQyJADBMsT4M+n/WDU0BAACQMsDmgG7AjABiAVQBGA6ERv7XVCmSLOkgUErQ69kKPN7eEsIALMAkEyGWvaVZsoBlA8ylmSArdsIswAwr0+SAjAQrMw/RkL9z5IHqoHAHHxJttTPtFGg6iPm4IuqoFuJhAcAJEx0WSsg962JWDSgmrH7iL8NbIVYQnlR/1ZEKytm9J+9O3pkymd39Gxf2608e1UiNUf3NsPtauVLGYwBADeaiIvK4+mOnu4xvktyvX8uh3eWwazzGgRhcA0y0kjd8iDI+X0NGiAmnuMhlU1IDmBIkaK/Q4rYJ5qYcgCnQ0ZR7GNd6wBB8FugNS/EJCfOs4D1uU82mAsYOw5kExUR86O3bECGBCA4GXuc+SbrkCHWzjPZoAwJQHA1JADBeYC9/U8mAHvlAa/Tb2VkAMoDTjIkABsBUB4IBqA84LAWWH0HgGwiCWsWBK4DBCH4XZAgBL6OFoTgDzKC4HgtVsQlPdqS4tCgIQh1p7uenv70NYL77azZLmtj9GhdmTX+bnlDd8Yb81oi8jFH5K+8hPkuSl95ktY/Is0Zp+I1u00AAAAASUVORK5CYII=", targetHeight:0.171, previewSize:[1.0,0.86] },
+  { id:"cavalier-ariana", acc:"SCAN 014", name:"Cavalier Ariana", scan:true,
+    glb:"Cavalier%20Ariana.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABNCAYAAABZqmHQAAACNElEQVR42u2cyW3EMAxFXUuAXHJlT+xJPbmoIIcgDmDPaOMi+x14TDD6j7sMbR+fXxvWZXph0vJ/ELJN7L3BFABj9uPJpVH0ZhAIbSf80QoA6lPNbmQKgNdevxsbAALFP0JQAMSIf1oTnix+CRL/X0qiywGAu+2JbKPNDI4CvB8AACD9AOCxAAQAtKGPBBA2CddcbHTdLFXcWqXyfE8AsydPPVlqycnV4J7UxAuAJhn5s5nLOhrhK2/GEP9mABA/MAUp4sYBEISNBYD3d17M33XLuIT3zwKA93cMYABIIP4sAAjc8UkiAOyLbdUyEQAOnx9aAiD//6WarvU5AIyLLAASpp2ZAFi+DdZQIsC4zSQCEqefUQBsQAMBIP5g9zMCAPEn5f8eALSdE72/BYBQcOfm/hYApByD1FMLAK83FP8dAMQ3Fv8VAMSfvHJoAYD4Rh1PDQAKrlPquQKA9xu2nO8AMGQ55v4zAIgdCADvD0g/RwAlqLhdvTz4OAAZD1bu3H5GAWht6eTO+f8XgC7gTXIRNQUAwYMMAGLFB0BwEdOVOyBrAKt7//IAFAAAyB7BjwQg2YrwtqgH6UBn85hJWBJGQAu8bXUAGYcwbfhbNwDFGIIkAlAqz1w8AXg8sCSJuqBSeVb1BFCzDMuWkrwWiWZRHHFoXRCAWRRHhP/KADQTAElyCO+bszQAegWYHcYy0buXBHAs0uVQtLwHs+PboaUzv6t3R+T5Wm7GJ4t/v8yQqN/3DThONm9e0cZxAAAAAElFTkSuQmCC", targetHeight:0.097, previewSize:[1.0,0.81] },
+  { id:"vase-with-flowers", acc:"SCAN 015", name:"Vase With Flowers", scan:true,
+    glb:"Ceramic%20Vase%20With%20Flowers.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF4AAABgCAYAAACUosWzAAADVElEQVR42u2cS67bMAxFvRYDnXTKPXFP3FMW1Q5eC0GQGepjiZTugAgCJ058RPFvX/ev3xdkqNBf4Z/Xp+MXQI2XTyL8cIwAqk84AcwZ9H8iP8ckXRDAGwO+Vjia7YwIXgrvKQJszWZaRV76f2IAny6QRHGuJY3iRodHC6BTFun8/35E8NQRachE6Op/jRaetYDnwtaf6VApKviSc+oBxZ2JUX4eMuwAigg+dY4tmtu7cPk52Lgz1cWOFEZypcnRNJGM6X0aWcmXMkB+fo4OvifCIaNN5sJnJVm4J+isnI+13blDlsgN5oIaE6Er2yFS8T134KkjhJNGB1lrmlLNTX9XDNmqu6iGHiKO0pbVLpAG7qhvWpw7Wc1xs6YYnsLEVpF7fGnC4hNK4M2/6aUG8w0sZ1o0AjwlUgNcMnMlLflBBOiW0K1nt1l3nuYnqk2ed/BaCCcTTdzw6qZ3+06DF1wqQL9a//cQm8sEDavV8tev3WsVcpVZo44iWljw1Fk9dK/lnksGPAg8e3Cgp4EnJeF5kula77HbxJ3Q6e4rYWwNngrazR3gR0Gj3cFrxTHJ4m4xnos7IMs9eW4nQq3m09mSs+yQo5xra/ZKX0rFqdMkZdGpkEMcAZ4btJ0HhIh5X1QAXtd2rgRODb3XI8BTJbjeISJLU5pOiePF0Lwmoyl5ClGf/EGp4X0s+Nruv7XRQYUZmaXXvtrGa1VJudtqK6zU1Gm2SfEYx5dmU1Lo2myidCRTLm5w8DBLw4WBIc18iHEnuRZvQ0x8O6ml7AhedoEXCTxFMQW7gQf0ReA/gD4fPBUmbWUnh/k2eDL0MLmyqAXwL9w+DvBOwTPAj23XQdsH2ngZDF0Afo3WM8C33+IO8JPAM8DHBw/nutDcAPwiBwvw0HiAB3iElAAP8AAP8MeBF4BfAx5lgw1MDTpQqNcAPMBPAs8AD/AAD/DvgxeAXzNtkD9tD+AnT5QdswhvPEgNk2YDwK8E/uYT+VyD9wJ8Syc8c0YS8BXw3qFvAz8i9C1s/pulXmi9AbwEBP+JDp6CQg8d48/KRAEe4AH+ePASGPwFjQf4Y8AzwklkrsckUNvUagi2fV2tRmBiUJ3cvgsVoeu05fjHzEYIV8iR4x0CQO/LH3c7czsGBbMFAAAAAElFTkSuQmCC", targetHeight:0.32, previewSize:[0.98,1.0] },
+  { id:"chain-links", acc:"SCAN 016", name:"Chain Links", scan:true,
+    glb:"Chain%20Links.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAA7CAYAAACE0Y8MAAAB90lEQVR42u2cQY7DMAhFc5ZI3cyWO3En7pRDTTeRqjSNnMRg/g8LdjNSysPwsbGn+fU3JTZ5m25sYrLMH2dvW36YFADfqF8aTApAf9NG59NAQIv6rRl6XUB2PsVqQEs5dBCYnL9aAQhMOwXAQeMXgADzcr4WgAKQHoAVgHEAPItvARgc/WtnXAAGRX+poMHRD5mG2KIfbhWgbzvA7wmh6374YswY/VBpiC33wxVj72mFZaAZIwA9kJPW+HeVhi4A0ATORF0FcpQlWv5xAbdREPTge+QIgCRJH6h9Qav/ZA+Akjk+WhGd9d/0BOdHAbiSNTSDXkevA3dStmbQ68gr4G7g6l7qMUIAMufcYtkFoBX9YWcbwr4CLLHzbVVBrOpHsjt/BSCleMKPVL86Yaa0MyFE/t5WhFbBdVM79isljp5gyA5AvL8pwxhJZgDmLQQ822x0ABqhws4eKjwFgERJ4OjNJwQJevf3neo/EEYNo2SoROT83mMpRpCKeq3oS5038uDVZe39cUg+vPb0blhWYzxXdqk7zJNxEFsf0bMxteOa4JLe56CSzQ/f7s7+RI0lXDnW86wh21tB20KeSWm5HOwjXWgzhohHBhANwdXxqACiIITNkqI+9aVIeZ4RQO/+Yth1JqpHUC/0FjYPvtLKBuDM6khxie8fbKorGbKTAgAAAAAASUVORK5CYII=", targetHeight:0.048, previewSize:[1.0,0.27] },
+  { id:"dance-trophy-jessika", acc:"SCAN 017", name:"Dance Trophy Jessika", scan:true,
+    glb:"Dance%20Trophy%20Jessika.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABgCAYAAACnmdq6AAAB5klEQVR42u3cy23DMAwGYM8SoJdeudO/E3fiUO2hBQwjjmVZEp8HArnFX2RJFklne319bwpBv4FV37cpIeUvOCqSdkhZMaIaSGRAyiE4GhJvkBINKSeBKEjKgOQPSImClOhINCDJO1IaAp6R1IgUz0jcQJJXpNwIeETSTaRYR/6fEbH7zB1IHn3btl54z8WODlxEN1KcBWVASiEL6SeQARl+dUUhgyDpLhJR5mMho8zHT0jKgPQ2mnh6nrRy1Lo6gw49NMPoKE/NDCAD0gIUK5C8cM4dUzKXOSGNtOPwkVqRrSPt1XMFEtoLywqkicWlkM62DhUkZ0Ca2vRnIKnhgnoQ7AGJzj2UG+Y7NPfJT5Wlp/NtP7r0cl5pdt3ikgLJGZCokQzSQIgMSK7VtZCFNINEIYMgh1SKIyFRSKNIE72us5HIgOzJ5Llrz5boyCdJZzdIjowckVGHZeSoughbRNKEjhCyhpxd9CFt5IqqFmsjzRdgnyJXFmCXNEa8e23ITGfyCKSLTsinL6S56IRsQZKT/tZupLcu5f3INr1q6LWp/taClQGJQhaykIUs5CwkZUBqtHSqICND6SoxZeEc+fjksjJLd3yg5gUP71OSy/Rq/NORhsxDb8GINLo/Riewz36Q0/TID57mUarYnmhxAAAAAElFTkSuQmCC", targetHeight:0.3, previewSize:[0.6,1.0] },
+  { id:"dino-skull", acc:"SCAN 018", name:"Dino Skull", scan:true,
+    glb:"Dino%20Skull.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAAwCAYAAADuFn/PAAABY0lEQVR42u2cQQ6DMAwEeUulXnrNn/Kn/IlH9VIkhFIRIPaaMAdLLb2UnWSdGJzp9f5MN428ibL6vPyeot9HhD+RKmLOv1iEnQ0iV74v0NIG5hAAtjdcKteiRq4MlLAAaqKWmwh9BszaAuUARhW6NYo3gPxwwWuRvAAgfodZgOh2uaE7gIKw/SEcWacjqoEdtYiPkIYQ9gAgoPHKCM/3i2YAeL6jFeH5YjvCdsQQSLrinID9BAKA/Qh2ytgPAJ6diKlyBskB+L9oU8YMEJclyAHikgQzIEgpghwgekrGDlhcksZ+xM+IAaABkAEQaCcMACEEAIhtiU1YEAAsRUXLUh7IBClHA0FcDcWK/IRPey9msSpyEH7v1cQZO7IVvvXlXCAYCX+kPwAIx9tZu7coJUD8bU+91JF/pqu9PMxKTDvmrxwvUAYd1a7nS/Q654FRHeCoAg8YpeK/rfGo01LSKAJZxxczBnX29SX9hwAAAABJRU5ErkJggg==", targetHeight:0.14, previewSize:[1.0,0.5] },
+  { id:"fall-leaf-raquel", acc:"SCAN 019", name:"Fall Leaf Raquel", scan:true,
+    glb:"Fall%20Leaf%20Raquel.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABDCAYAAABjoACgAAACHUlEQVR42u2cQW4DMQhFe5aRusmWO3En7jSHaitFVVq1SWaC+R/7L1hnwjPfGIzftvfLm+ziqN9e0dl2dfiXxaftVxOAwQ7fHxgMgC3s9J0lAgypg8laHgcdTyVB3jgizjqecg+wRiAswfm0WRAziFed3gIAozRZouNvzdjTUCMAMcr5txaV//NspoEK2b3YYjSIVzXYmmo+jTxlZSA2QGoqZQe2UWcfgDJXe4BXfUk0jJAJSwK6Ext1Mc4SoiHIAdjWoBp65hDHvvLTYVRVJWdY9UMgVNZqbLKVn5IlIUrFDjjdVh7c6DtiMzn8ZTmapZpZucL9gWx6FwCdIdidXkQrAD6pDD1dTRUA8MYsAGAIaAD7QuYCIAlaCsBTlWEBAJ+IBQDcL1AGJAACoDIEsDQt/QdHgQCAMyHpP1iKBGDRk/BKACiLcasB+LdVqQ0YDGHFpjz6zumPi8crAjCC7/q+ojPzpMuZ3Ny34lJ19+nGEYej0h7BbNOOGQC88lDGMnLKViSLxN8z5oZMtfZ64h7lv+yv23OtXkuJjahVeOd7UmfF2J4cYLs8O3xakvG1E7YZr9NXzzsCqJIiPxGZvgoAJ5SiyJ6OZAZQmZYehRACgINgHQa1u5ar7YA8hgBgM6N9BQCIen0c+LbpATh5FAiAAMwpQyYA2ChQBADbli4AWBkyAbj/SuMji27O7wIg682iSGjSCMCAiIJ+zwcSeTDqShD0LQAAAABJRU5ErkJggg==", targetHeight:0.055, previewSize:[1.0,0.35] },
+  { id:"fluted-glass", acc:"SCAN 020", name:"Fluted Glass", scan:true,
+    glb:"Fluted%20Glass%20With%20Cloth.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAABgCAYAAACJ3PsoAAABx0lEQVR42u3bTVIEIQwF4Jxlqty4zZ1yp9yJQ6kLrbHtH6BDeM9hkaVTX1EhQZrI4+1dAsI2ISMj4kf8M8pOfOEVEX0E3uIh0FaB3YbORPeAQ+E9f1RuhmajLQDt2egSFGloD0RbBtoCwSloDQbfTpEZq/y82jYKXQaHM6Kba/esfL612gjg5tVGATdVFCRwNT6zxIU1n9HtOg1dQOJ/oxUIbbVoW+gXRCsb2ls2oqGnBjJa2Oq0MaKF8cDUfZ6GTY0ztCOWuiu0MaaHsKKdEa2MaGFEG1vJE8Y6bau5JKHp2rgxostCD7j2XVcIWXDEG9PLMzbq5eMeXPfQCoz+tUGR8/kwVRhS48/RFXkDHlYUlrRY6GloZURTbkS2FDGmbvjTFdmaC2VHFLazh7Kh/eg87QxglpXWM7QygNH/R6z+No4Cb7r3QEiTy/d5SJ8uqh/LonxzCX0g6zPqMMOrXn0QvVTvnsSYNRNwa+Zl1vTFrSGd7MGc1JGR6NxOQwsr2hnR2lDK7GI/pI72eecK2kz0N8CfVlQ7qs/UweDejbzQI8MZ0ZbdxqNX2hlzOuWUF50eu19jEdFa2U0VCV17foFD20lU/cYHXEuArTrSFDEAAAAASUVORK5CYII=", targetHeight:0.18, previewSize:[0.47,1.0] },
+  { id:"green-apple-wei", acc:"SCAN 021", name:"Green Apple Wei", scan:true,
+    glb:"Green%20Apple%20Wei.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABXCAYAAAD750AtAAAB+klEQVR42u2dQXLCMAxFOYtmumHrO3En34lDlWXLlAzUtp6SvIX38J/0FTuOdImv66Xguk1Yreh/+7XoH9B+CNYf6564+hOwwwNokNCfrtTsyRL9vtO1HMYq0fuORd+CUR7AEYX/q3aUA9BOIPySjFD88WxoJIAziz/FlhQfhqD4MATFhyEoPgxB8WEIbrJgCIq/frVRAFrPwixQfDgLtB44C4z+vPUxAKM/4fR0C4CiJWSB9gNnwda1EAVLKMb6P2xD+j9sQ9oPbENGP2xDPv3ARxPaD1wHtJ9CALQfoA5oP4UAKApgQ9pPEQAePUA2ZPQXAGDxFYAAFAMEYAEGn4TMAAEIQAACEIBigADcCYPvhz0JLZABAhCAACzEAjjn9RRfSRY4jBNAEQCeioLvhK0DBQC4Iwbuh3o1sdDFLOtAgcu51gEYgDYEf6BhFhT4RsynocTGHX6mWvQ7YbMgIfrDZh1s9IftatjoDxs2sdEftixjoz/ebNrnvmDic3/8s22lQk7Y9Y4A0IoWRH/YOZcpvDHQvFthJxTesHt6DfHD+QGM78eECRrWgwHfj0kzZNwfDIofTlFixQ/niOV7fiycpNd92nGW5C6iPhZPU+16PT9PuB1Q+CVzhR3m/NpiUsadZ48zH4nAZ1HSxo4fAcCr2fK3zGiruL4BzcGdlzfJ5ukAAAAASUVORK5CYII=", targetHeight:0.073, previewSize:[1.0,0.91] },
+  { id:"cat-skeleton", acc:"SCAN 022", name:"Cat Skeleton", scan:true,
+    glb:"Headless%20Cat%20Skeleton.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFQAAABgCAYAAACDgFV6AAADDElEQVR42u2cS24jMQxEcxYBs8mWd+KdeKc+VGYAe9BoNNL6FCVSrgVXQeL4uaiiSLa/yp/vr4HQwd/fLkZ+2V5BkACg/0Aef0MIcRwoYQKBvmEy1QFAlTBxQKlMINA3TJ6bAKBCmDigVCYQ6FmZvA0BgB40IRxQpjoQKE0IDJSpDgTKVAcCFaoTC/SsToIBAGXNCQRKZwcDVaY7gaYASnenQgn044CybGLZxML+o4DS6UFAlWmPb99RpWCgSqhYoGe3Z+qDRiBGlfoN6VhGOYyReR0FLzp4p768skB2BypOUOV0jNwNBjW7If72w8PhPD0a4q5pI9HP9dpVRpRSD1DIKdLuh/bWqG9VGRBoWNNs3WDuUevhHBrpmanWBxZa1WoTgF7hSgagNYDs5g0diyLVg19SoTxboM5r1mgWoC1gV4dmAnp18YhAp5sV+hoZVakpgfa6uk38UNIB7YE6U+mSEWgrVG2se0MblXcK6CmsUTnmaFSSFWjLrWv2TUt3AdraybJMJdXKRoI0qCaN86/uzmjleSpZrqkReogRoB47AW1JfyXQcaM6twS9ewa6E9CafuuMUkp3AiqVaWlRlRpxFNvyRtXxPNVdgNak/Sz33wKodrxJKUG6U9kUqgXfj4Wep9nOUCk+Te6nO3/1eDoTUCu+kwOIUrOUTdb5t6xMXqLIYEjmXNv2zr/SApUOaNeuvH4qUOuEuWKHKl1zRBeZz9BcKrI6Ry8AM6BeBRG2H2oO6rTLFLZlCdge9mT/H1FR1akA97YOQ9QHY3x8zajOjirgp1+PoxbyqGaKTRaCRoSp4FtR2nVG1JVQC771ZzsD1eI7KJOVUCPOjbTEarKkaDDrBHdeAjXLMM4DquwGVCbVkDJzoznyHN4yQo0+mLNsH16GaadlqjCyrOHMhDp0DGTabUI6M7pTFXqMLGXOs0Y1DWq7rFLa0wcb9bs7ahT0HuvKpZc56ys7NBPQ0XmRTgB6mzGRgWrxX/aCT0B3B6rOQDVTyo8CtYbXsYb1cMloSneDs5ZY9j//ADnIAhnN/uVhAAAAAElFTkSuQmCC", targetHeight:0.3, previewSize:[0.88,1.0] },
+  { id:"kids-cowboy-boot", acc:"SCAN 023", name:"Kids Cowboy Boot", scan:true,
+    glb:"Kids%20Cowboy%20Boot.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABgCAYAAACKa/UAAAAB3klEQVR42u3dTU4DMQyG4TnLSGzY+k65k+/EoQCJSlCByEz+/DnvwstW1aP8OGkSH+fL69E57CNKRRwZYsSXfuK8VQSAT63OK+Ee4V/YtjPgHbi/MG03QOsA9xxlF8AyAE8S8s6HfDDe926dDnAWnszYuHK8uxKmDOiL8UIjzkhRUo+LUbusDKIaXrg0Z3Z+1zPCAboQXphWqNJlQ7fAAuCegAYgLRBAADulMQBuBujRAB3ANsAC4F6ABUAAAQSwI6AB2L4fCCCAAAK4M2ABEEAAAQQQQAAXASot58IeLgIQQE5nSZ8PLEwgAAKoDKiQylhkwIMZGEAAAdzoFqfaLGzRAbmhlLgFylw2dFpfG2Bh8gCQ25rKgAdjYDtgYQWSD7AACCDJtOokIrWhyq50wkRa4tEJNUA/2VDVR1QHXI6o/PBOCMQsgMsQ1bvv8tVKNsDpOWJGwKmIWca/ZYiZAacgZgccjrgD4GN2HvJu/y6Av4Eas3DfJLymBorRAju/rq56UynMspEu3DiOAtiICGBnQAfl2jiYaT8wxCRCN764NFQ5oRoq98vwx3qYHe7oVWzCr5MVC7KEKn6lVhIoXNWwO9Va/WJ3+C/8XLPrEqI0ZNWWT6eoLbs7+nf8iHfqV4ZmnhzjoQAAAABJRU5ErkJggg==", targetHeight:0.17, previewSize:[0.83,1.0] },
+  { id:"multicolor-squash", acc:"SCAN 024", name:"Multicolor Squash", scan:true,
+    glb:"Multicolor%20Squash.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEsAAABgCAYAAABVJY8fAAAB5klEQVR42u3dQW7EIAyF4ZylUjfd+k7ciTtxqLbSVBpFgfIIJCb8C6vLST7ZBpJAt4/Pr+3isJ8Ir7/bTHH1D/4ipVcEsMqRwGrDSmCVIx6ARbDyzT1lIoBVn2Hus+zOHw+zgd19AZbJsgBW/SiZPE5avVxImKEcvVyIzTBCesdyVY6ey9BdOXpu8PtyNLDKWZWDew97MtbfTUYRqQXTLZZdAHEG0DxgmTOYNGqxPmKp4j1ia5b1fmowU9hoLHsAUvMcbmUoGWy10jvV+IESetjK5SeXY4912zLZ1Xvd9ujsIquE7CKrhJGRrDoOCSssjhUUrETUYQWgjhs9WSWU4qqz9aZSpARPYAFUKEWwhOUPJSiUIljCFGK1B3yn+hb9CqwxfYt+BdZYLJp7Rd+iX4E1ZiYPltC3wBKxGAnBAgsssMACC6zKh4BgCUsesMACCyywwAILLLDAcoHFk1KwwAJrpqcOvJEWX4UxIoIF1u2v72nywochYAnfZ4ElYtG3/tk4AFbj18qUorBpACxhOwqlKO4KA6uw9Zdtv8LpIaueaNRtQzn7pDNn0qx8XpaUVSUsYwTUzqKJlJ92JFQESjuZLS4C1eXMvydPVqXTcFtP3L77BvfHnD/2iHM7uNn32GO4+bcM32ZoBMSt+vJIAAAAAElFTkSuQmCC", targetHeight:0.14, previewSize:[0.78,1.0] },
+  { id:"toy-blocks", acc:"SCAN 025", name:"Toy Blocks", scan:true,
+    glb:"Multiple%20Toy%20Blocks.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAA+CAYAAADUHB6/AAABZUlEQVR42u3cMQ7CMAyF4ZylEgur7+Q7+U45FEUCBBVNoW0aN/4Hi4GJfjKxq6ek4XJNMyVj6Vj2+PxWidpWpS/vDz5vrBIegAsA+eB6oggAbQBK3RMOQBwATEsiAahDAAUAAAAAAACACAAZAAAAcFYJAAAAiACgAAAAABMQAAAA0AaAJQwAAAAAoP8RFAAAAADAIYBwALcDUIeLWBgAZQQFoBRT7D4ZZ44BanWCLKS3c+1kt/fppwaAVe5U/SfpHQ1AnPyOVxedCWCPM8DdhHcmgAQAANUAFAAAAAgAYAC03QEyAAB8dHW0LRgAAM4JIAAwggLQGYA9AVjCGp5rAAAAAAAAHAKQAdgwLfQMwBbccLnkRVzjv1Wv15OFeA3xvgmL02CWDR2/hiilo9VBUHfPJNypAJZu0T3iwe+dAxWvnb1HpnJNdG8uLVY7DGvezrXI1wZPw7bW4lzjAu3fgdaULSWqb+4gaHIAglQ1AAAAAElFTkSuQmCC", targetHeight:0.117, previewSize:[1.0,0.65] },
+  { id:"no-fishin", acc:"SCAN 026", name:"No Fishin", scan:true,
+    glb:"No%20Fishin.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAE4AAABgCAYAAACzDERbAAACQ0lEQVR42u3dS24CMQwG4DnLSN106zv5Tr7THApVAgnRGQhJ7PjxL7xhUeiHk3jyYtt/frdkwfdQfZ+oMMc95B7HSfy9ToD7j9YaBLjv0R4BuM7gaHD8EiPNhgbgpjdZTTQZ/EefO3me8PemDhYem5V2TGkBFeFaM/wqCHAD/SXgOrMScJ3hqcIHHOAABzjAAQ5wFeEYcIAzjQ1wgAMc4AAHuNeJTsD1rpgBrnO1zPsKFzIOcIALsyDtLtsstkBItjLECi4TGlnBcbbmaQVHQTOraU8Jmmrn/jmPW09dg1nuyHT96AQ4462tFnDitfr3DCcZs61qHed6DzBFeGzyCCdZBwVNOMlYt2nDpS14NeEiPJu6PCAie6D5NE9wZdAqwbk+dsmAwwM96rhIcI/ShLM20ys4URiFOMtoegVHim/KWZrpGRxrnmNf0P+Z3jtyJMq6bRWcxreWFo6Vsy4tHClnHWeFO+vEOSCcrIBjxW+Popci38JxsH5uCRwp10Vp4TblfoOrwc3KupJwB5pqP5wEgBOPcCNNljIXwK1Z0YMnmeG+yQpymm2mcL1T3i3XKK5Y6TeZyKRJH5ROSo9VCzhh4EqsqX5ac0h5Bst6Pi7d6T8Po2rY4+FadVxmPNmVV/KzX4OhciRpZRnhPvuqYg3jVRoQpl4iD7TOgrnCBSsqtV6Ji0ABB7j4/RwGhgE4DA4DcI/MA2BjMXz1cF8ZkPYFsyOffijnXcjikZT3ibMjshtN0yjdCfAuVFa5WoKeYqsWN88hLRG/qGu9AAAAAElFTkSuQmCC", targetHeight:0.25, previewSize:[0.82,1.0] },
+  { id:"orange-pumpkin", acc:"SCAN 027", name:"Orange Pumpkin", scan:true,
+    glb:"Orange%20Pumpkin.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF4AAABgCAYAAACUosWzAAACH0lEQVR42u2dMW7DMAxFcxYCXbrqTrqT7uRDJR0KFEYMx67ET0pv+Esm4Yn+YmSTfNjX9yOJ6kvtpZJozYfKsMgf0NtOgHfQ9kYV8OPtZTsQ4EXgG+A14FPDz7DINiP8LAudDn6mxW4nKoD3y+fTZjrZvPHssK2A1/k94In6ucBPcdDOCr4B/r6d1J2ttDe/pY36SKnip0CvaL+JdRXw5c8LjC2YmnIjVJlHxE0omcFnA370FJQs4EtQO+mhIRvhdYcyg7ra0erWItuAkXcms6t6gy+LA+/yDxnoIusBej+VUeCB2xE+B+mY+6Eu4Csw+x+4+LoIPhYj8nssRuT3ZDEiyyHaRZZDtIssh2gXWQ7RLrIc8nbRNTI2I/J6bCYAeGzG0W6wmQDgAeNoN4AXg8dmnO0G8KKox2YAvx548ncRePxdcGEGeFFmA3jAAx4BHvAI8IBHgAc8AjzgEeABz+0k4LmP59UfAvy038oDnu9q1ipQADzfTq77tTBV3I51UBQmiCr/KMWh+Iw6V7zeoayeHjWiRhI0kRBAt5O2KVjOAIsxOjTpoNuHzeCA/8/U0Wh/qI90u9HwkwO3E3S72VuY6L+QvVjnNuaRh654A7/VSz76OKHIwN37x6/4RPzOkAozquLKwdxWimgLNvksgyW5zIOKMGauZc1MsoKPZE3uAxmzzOoetRHTzfqLvBHNAowczTpI92gj6onCzHh9ArdQ+Pc+l6A+AAAAAElFTkSuQmCC", targetHeight:0.16, previewSize:[0.98,1.0] },
+  { id:"painted-glass-bottle", acc:"SCAN 028", name:"Painted Glass Bottle", scan:true,
+    glb:"Painted%20Glass%20Bottle.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAABgCAYAAAAD82JpAAABEUlEQVR42u3aUQ7CMAgGYM5i4ouv3Ik7cScONU3MMtNuaWnB6f4H3qZfYLSbWLrdH+QMfoZUonq9B3h9mTUEj0LWGPITEGdBcmmIAG1DsyAD5IG4E3JvqtIJCSDPGhqC7K8gzoIEkBfSLMgAAUqF5OwQZ0F0WsgyIB6AuppBMyAZQIryRZSsmtXsBtjNKqpkRVbR2di7oSg6m7V8M9v5cN+LLtt6nyJauhoZ9wcQoO9AmrErFAvWAF0aIkCAitctzoIE0BkhAgRo/W20hUJbG9DQhCt65/4YaAggQOkQRS/W6Leg3QkkR5WtNnTiiGz25nU86xkUOVNVz9kt7mx9PRpt9/zhq15k5DSabo65ccvnFuPvhz2ZjaaSAAAAAElFTkSuQmCC", targetHeight:0.24, previewSize:[0.27,1.0] },
+  { id:"pink-backpack-charlotte", acc:"SCAN 029", name:"Pink Backpack Charlotte", scan:true,
+    glb:"Pink%20Backpack%20Charlotte.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFUAAABgCAYAAABsQj5EAAACO0lEQVR42u2dQW7EIAxFcxakbrr1nbgTd8qhOotGGkUzIQR/AuEt/qqjVHqyvyHBZgk/v8uB7KX4Jsv8Hr2UA7p+UALcdajLF6ibIgD9oe4BYw8noS7/6b4HeAQ4AfXcD+MHsFsRS4C9BvVb1KYDsNvfDah52QHEEqWnenHtA+JOHrDj6CsLz4dFB6C5iB4isr0eZCKgQ0a214PSjVC725T0nPa1lmEjQ107V3MPflLad7PLG7U4de23T077XOTK/PdJxambKJ4xSuXeS5R+lrWGmiaAWmUHM1T85mDxUoHPEqX5rW4q9VkK1LnUtxIroEAdS16oZvRTCw2/plKkHKCuE0sCNU4ONQJ1kHXqinyhGkDLVwGkvsBXSX2BBQBVYAGkvsACgCqIVlJfEK1AbQiV1K/YXQG1/tzsaahAq4hioAo8l/2+IFrxU8F2lg98AgvAT4E6JlT81KFYAVUgilQDqEABav9Q8VOgjgGVIiWAChCg9g+V130CqBQpoAIVqAioXb/6A6rgJTVLKtGbf4A4Q2Xf7/yJGj8FKlCnPfYDVMEBNaA69wSwnBKeTyVaHfsB+EYlaAfi2I+gzZLDFIJWINJf0AxMlAp6q4Aq6AKkSAnmAABV0FZJ9Rc0ALNOFYwAoY9KMFCBCZSCCRXMoxKM/GDQV1mlr56hsgcbw1yT0y0UTvgNFwYo7kcJPwGc5C6VkqG0I16ZdMs1drW3/Ny9vu3yzj/Vg6NDVMUw6M2ULf7J+/Wfw4Iq0R8in/A4kwo1EwAAAABJRU5ErkJggg==", targetHeight:0.35, previewSize:[0.89,1.0] },
+  { id:"rings-raquel", acc:"SCAN 030", name:"Rings Raquel", scan:true,
+    glb:"Rings%20Raquel.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAAuCAYAAADXyhwkAAABg0lEQVR42u1cOQ7DMAzzWwJ06eo/6U/6Ux7VDB2CAGkVW5dtDlwDgRRoxxZdtte7JEI9QEKUGZCpGD6wN4CdBKEfNTbXkKXjdyXw95ua9T1tDBpFgKpIvIUQvfWRpIYZyb8KEV3fT3saze93h3XCsjlIKkC9FH9G766EnMmXWkN1agyWCKDVcXQinBKQf1cnBzTBrQA1GUmzot4JAHIcNwjZ/Hk1FFhP8IYgcmsInASA9QQLADICBUD3QwAIADICBcD2M8EijC1o0HEEjiDwJwwB8Dccdy+B09CMAsCKnOxHeiUJGF5LZphcWPY2TDIVgUXZ0H6kYykQwaj7n8wFwY6MBsWyD1RNaz09k3E4PVWwnt7RRFiSAvkas6GwpM7hYK3gAshunMzWTpCA+D+W4zGeTgtb0+M8gnUIgxcivimR45WGmVmIroCgdyyJQXx8RIlAfI6UJK3i89mD2nUAMeq2QFL+KggnsBrzBP4obyqQYciPt8D3J0Z+6KJVEJam2D3wAZOAqF9IR4nkAAAAAElFTkSuQmCC", targetHeight:0.034, previewSize:[1.0,0.48] },
+  { id:"roller-skate", acc:"SCAN 031", name:"Roller Skate", scan:true,
+    glb:"Roller%20Skate.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABXCAYAAAD750AtAAACf0lEQVR42u2dQW7EMAhFcxZL3XTLnbgTd8qh2sVUikadiTOOzQf+AqmrasQz+IONs7Wv7w3A5Nf0YXb4e8tuCE7fT0wI4H7HW4fjS0BAd/yfGQH4OD59NERyfMqImPFPdaLjj6YEsG7Fp42CiI4/WmkA6uR0Anisem/nl94DlAAIgAAIoDaAjQAIgAAq1wEEUByAEABVEAGwFUEAZVWQEQA34vIA/iJBqgEwIACh94SoCihNSoqqgNJEQfT8TwAEsB7ADg5ACYCd0mkANAgAzQrACMAXwM4U5AdAAgGwjAA0EID9MGsmWQDsgU2jA7DgAGAhZMv94Rp2GXN/qGiokn5gIyH75gsfDRXTD1REEIBzAVc9/bwCIARQJCIq6X9ICMz/zmqJAJzVEgE4RwMBjIMQAgh8/kAA84EQADIMFmLOdUXVVjSMnEV+jKmClTyShJKxlQ7lQwOgKgIAQAgT1BABgKsgApjcUc06oIGcduSOKUmqopvOETJMyoc+0sw2Jxzu9OxslT+/hK4Oq+f5N1iAFd99YoZU9b774fLiOPD48Z+Qb5l6pxZ7At6jvrQjRaq3uvkEgNcZqt4M4L80CntvaGXasQ5F1dMQHLmRoKgAPHPkzAhYlWJtBMDqfDkK4NNrIOYtOVEA6IcAdHAIG3JAvAoARSm8CACwDlCAYqVnI5OsADYAANbpXPQ9QJHrgHd5UjoryhEVBA1Amn9rVjr6QyN1AKwKWglBBoolBQeg7Ybr6dI+a6LdLdGsnT/Md/WBPshHoq6ohrNG2t1Vorb7Gn5X9jlrizqhvXdDZdBZozNVetF5ejGy7BBNchH+8KjSrI84W4v/gQVdMSP2AwwTMjqPqYWCAAAAAElFTkSuQmCC", targetHeight:0.227, previewSize:[1.0,0.91] },
+  { id:"roman-bust", acc:"SCAN 032", name:"Roman Bust", scan:true,
+    glb:"Roman%20Bust.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAABgCAYAAABfeSFNAAAB1UlEQVR42u2cS24DQQhE5ywtZZMtd+JO3IlDWYocKZFs9Y92VzG9YGnPPAH9gWKu8vV9LTJttJDnrXh5HzB7/lZ2g8jzZTzIrBcqCsIXmX0KRBdCdHkHJZSmvcMA0ATTA7EToArDBvEWBiWhR0x7QQwUxHtABBjiX4ixhtVfkxYQIwDRFhAnsTQgkiFHfsIrC4hnCa17gEgWED0gB2QNiB+QDafgFGFV29k1CwhTiB0QuvtIGhCGhLdzZz8gG8tBDDmSokCntwORLCAXQ36wg1gWEMkAMtR6g/cGaw9xuKur6N5gBJFZwQDcvsEuGJgGEbQjyYwWRVBXrFGZk7GuWmjesRKsoFOkXJmVAhrKCoYszAyXOVF4BV0u27yCRQmYKe7syOEVDqIH5ENSwNuBSCEoB6GuXLICxApBFQUtpCT69GuFsPiwG6I62cMwP9I0GUeZD2xVlPCpN0HLhxEQKUBFuBkQQw6nVhBl8UYNxNETvAVk+0UpCgSy4t4LsrtYLVEguztUYfsIQlNHRkEQNSfdRxRk4UzXoRFdyvT7PQittd7YdPBv7+yMIC+rKKwgfkAYBvNT5AjdzGFNeKasEK/OWgKcDzpSaZTS/lkpKTH9lan/egA459cCCi0q9gAAAABJRU5ErkJggg==", targetHeight:0.3, previewSize:[0.53,1.0] },
+  { id:"shin-chan-thermos", acc:"SCAN 033", name:"Shin-chan Thermos", scan:true,
+    glb:"Shin-chan%20Thermos%20Linyao%20.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAABgCAYAAABfeSFNAAABJklEQVR42u3cSwrDMAxFUa0l0Emn2ZP25D15US2FQkiNk+brJ9+BIIRMDv7IJpZteDxtFuM7/OSwo6P0MjcYHgWSgTQWaTK+xjUQb7hFquNlPltlgai2iAoi18aIEqLatVwMUuxeqhAH0vqA/z6kKBClmSstJcQcISFahISoBilu0hQhxRaKAPEokM8EMIUk5VZR21QBAQIECBAgp2d2ZYgBAQKkQ4gBAQIECBAgQIAAAdIVxIEAAdIHJDH9NvRXFwgQIEC0DtUAAQLk96Cm+qLRVSCbi8WAAAHSCcSA3FDW2g0kRYE4kAsKXhQhuwvzDcjJBWGKED8CMkaBeJSuFSaPGBAgsSGH5JEUJSHeiUn/LhiXIHdgNt/0tOajK66pGoed11K9ACbQnle0HtfVAAAAAElFTkSuQmCC", targetHeight:0.2, previewSize:[0.52,1.0] },
+  { id:"toy-block", acc:"SCAN 034", name:"Toy Block", scan:true,
+    glb:"Single%20Toy%20Block.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABNCAYAAABZqmHQAAABM0lEQVR42u3dSw6CMBQFUNbSxInT7ok9dU8uSgYOsCF8AvQZewY3cWZyT4XYom9Ij+cQmDxl/GT++l+T6w7uLnj+5mXKS74Rzq7aeZS7L+MWQLZy2wJkpcQCWOFtU2oA1+/2AQAAAAAAAAAAAAAAAAClAAAgAAAIgA4BBoXEnQsDCD4VAwAAAAAAAJQCAIAEAng4KxjAdgQAAIoBAEAAABAAAKTRsSQAAAAAAADgt8LBAM4EAABQCoD+Hk8EELwdAcAnwD0AgE+AewAAAACUAgCABAI4EwAAQDEAAAiAfjbkAARvyAEIvgwBAAAAAAA3YY8n/sD3ADuibVLSwl+W+cuCawuup0+NqRrekzbGWCny2KVksdw9WRvWVjpbsasjB+/KmdGER3N0Mt+dg+TKmVV7Zd54dzGMv2ov2AAAAABJRU5ErkJggg==", targetHeight:0.036, previewSize:[1.0,0.81] },
+  { id:"sneaker-blake", acc:"SCAN 035", name:"Sneaker Blake", scan:true,
+    glb:"Sneaker%20Blake.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAA4CAYAAAACRf2iAAABi0lEQVR42u2cQY7DIBAE85aVctnr/Ik/8ScetXvYKJGXxJHB6QbqMJdIQVYX08Mwsi9f1+/LBJE2McyzzyB+/o1SiQQAnfjDgJhd/McIAOjEt4Wwkvjl778AaDztlMYAQEMUAIy9+wEg3v0AOBjREUAAQGc/do3ZKOLnjgAKADTeb5kFK3m/ZUO2KoBaMe5xlX1bI0YHcKbwj1kQT+pL2nm2vFknVQ4K+R0QM9739AbU+lwxIoBiFNEhK8mADqemU05dKzReLkEGmFgZNUBoYwAQn6qwILc64NZ8pYnFtwYQE4v+sg7g+QsDWMFydm1IJfxqoj/NAuxGnAXsfHFXzN2O2IYosmIbopM1B5BevP4Tm98R/YAN4ddGAAJRPn87yvlcXAewHRMAFFBRQ8buFxdiAAAAAAAAwNoA6AEMANAFiwEwMDEAQDaIGjHGhwZXEXtTrcRp6Zy5cK/vtCGoyVCeOfB92JIqm/TfG5TqLxw6DEXSTry7xqFvUIz2vaCoCJSPvJ/baSM1r/MDy6Py8qOwk3wAAAAASUVORK5CYII=", targetHeight:0.163, previewSize:[1.0,0.58] },
+  { id:"softball", acc:"SCAN 036", name:"Softball", scan:true,
+    glb:"Softball.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFsAAABgCAYAAAByiw73AAACIklEQVR42u2dQW7DMAwE8xYCvfSqP/lP+lMe1VOAAG1Rx5VGpDIH3aPJYknb0vIWH5+35Ou4sFLuJdOPaU+w7oNWz/QHZAF8h9YDfnsn2CTgv8BvCzsD5J/WsRPsrJBR6IQn3wuuVg12Lwr62dPTw27FIU9TuWoGgQsatBVtAwQuaBC4oEHgggaBCxoEbtcBtoWCBoFrH+PWMNiCHuDf2gdoJzu9i05vJ2dgC3DQBwjtA1S3RRFUt6oG1a2qQXXbgYB9tx0I2HeralDdFkZQ3RZGsFDq1Ytgax+Te27tA/Rt7QPsSoQNWol9NQxbv1bZwnYJu0b7J2zwSVLYwt4Xtg81MGzVDcJW3TBs1S3sPWFrJcATpLChT2N+WV8IW98GYftuG/jgq28vgq1vQ4d09G3w+JlWMvFQvOezwQPx3hJbfD7bQgnfPFDdE277emcdvMduSAB4h323LNXUYQEGuyRLZdBOBoCOC7FFAr8Q6hKmn82Nu4iBuX6HamYTK/ubQr6cOGw86MACGAbfrrGMMNJ5bgEMw8rX2UYYwz+3CIYDJnh/DnB0ShM0O6emCZofd9UF7Wyxb0cNdoGdFXrbGXYm6Pj009VTTvs7KDoDbLqA9lg8yzfTBOry3UYV2LP68p5of6lgj/bxdPPXsw627xULYFXY//HxlnVPmWG/qvCefC/pYZ8F3grsowTsVlnN1WD/pu5WCXQl2I+CeWRs6c6uLxH+4pNfm7b1AAAAAElFTkSuQmCC", targetHeight:0.097, previewSize:[0.94,1.0] },
+  { id:"ukelele", acc:"SCAN 037", name:"Ukelele", scan:true,
+    glb:"Ukelele.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABPCAYAAAAUYsDbAAABz0lEQVR42u3dQW7DIBBGYc5iqZtuuRN34k4cKt1UsiLbccDMP8BbzK7Ngk+8YMdKwvbzGxom7SYw30/LP+e/KSezh4ks9PMAV4v/acB5AKB0mLxiymq7XwxmiZ3iGeDObhkex7r/VihTA5SBxv0OGTE/U2GsBHCUqzgaQJl0ZEdgAMS5WjE/tdcjAMyYKvIjxrj7h5EF74NBfsRHXPIjPlEBYI/xNQD56ZOp2wCZBeuGEMmPOEnkBwAAyI9TAK5+xQDkRwzA8VMMwAIJAei/zUT6r51A/50CsDhCAPovBqD/hp8NAOAQgMUxyg8ADgHIj/FnwwA4A+ACzDA/RwAsDgBrPRsEgCMA3oCN8wOAMwAWR/xsKAskBOAWtNFHkGcAXIAJ+r8HYHEMH0kHwEn//wE4for6D4C4/wCI+w+AuP8AiPsPgLj/ADgBAEHU/6tnQyMoWoB3DO4VdcjPVvGVZeyMh87/W+N3R79/fT2LXZGfJwDOdgjJ+nD+7wVwtEMy/dcBrJyr5A3gLFdp1fyoAa52SV4hPx4BZnkfSTMBjIgRZgUYJVdLAFz9ptkQ+ZkNwMsROAKgBQkAaFEAEN7TSgDodkeueW0Wt213NP+a7As15vLMjB4dfAAAAABJRU5ErkJggg==", targetHeight:0.053, previewSize:[1.0,0.1] },
+  { id:"vaseline-mariela", acc:"SCAN 038", name:"Vaseline Mariela", scan:true,
+    glb:"Vaseline%20Mariela.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABXCAYAAAD750AtAAAB60lEQVR42u2dSw7CMAxEexZLbNjmTr1T7sShYAESQjRNm9iTtm8xYsOm82LH/c5kt/t0QKW35vfv0v/mr/+VJDuWEcwsGZNfegQrFErkilUbu0d5pcKGBZAOZnRtZaRRAZzR8NoKmVvgtBr+QH8rxQUApm+vjmYAmO5cESXjM+b5T1MYH6tUApAwKB4C5oshfADQdkQQJqYc7XQEAPF5AgC0AgAAAAAAADAFYQgAAIAAcFEAXIgTTUBUAAAAAAAAAAAAjKEAwBAAAAABAAAIAABAwbckJ4wAwOUB0IYAcM2NmMfTBwHAPjAAAN4REANgHwDAtQGwEYsBsBEDAACYIjoTBsAgADgXENwPYBQVv6gNAPGTcQAQtR8AiNsPAMTtBwDi9mMLnyzDpKD2AwBx+wFAvHINAM6Gg/r/EgA24qD2A4BBAbAPBLWfEgD2Aefxcw0AbSig/djKx7sxzbn9rAGgCpxXv1V8vh7zHFd/DQCqwHH1W2WCBhOR0+qvBcATc06r3zZkyACh09xvjSE+GLvzqqd1irECQkfzbWeOGBA6mW+NSXpMR43mW4coQyA0mG+dsiQzs74+zDMzaurjbBMtZ4w84bPH2nZN245I0c4YP06m/FFizb+Dmk+RKb81c75F+WfVblGKPvYnwjbTostXCiMAAAAASUVORK5CYII=", targetHeight:0.063, previewSize:[1.0,0.91] },
+  { id:"wine-bottle-with-flowers", acc:"SCAN 039", name:"Wine Bottle With Flowers", scan:true,
+    glb:"Vintage%20Wine%20Bottle%20With%20Pink%20Flowers%20.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACcAAABgCAYAAACe/mvhAAAB/0lEQVR42u2by23EMAxEXUuAXHJlT9MTe1JRiwRBoBiWLVFDigvowKv3md8RVz4+Pr8OoqEymX0eG6ycTLPAyQVcyQJ3NOAkMxxWwMlvTtUQhRnaGTi9gSmN4sDJ9K54mInPMFjg8NAylsBJo+pGQjka+m64qzfDoCdGvWeGizBkhvtLIWarYNthbRfq3FJ+vGcJpwR5Vnvg6m4Oh0ZcP/Pf1HiCk1OoGY1Yq7msN2mFJ+E4Iiy7q5Ax+OVmjMnsaPJWJbB2fg84Ob29ZoGrhaUYwOANN9suXHOO0XRdcy4VHFP1KhtOvSQ4owkzwYQJB7Z4ZHsOK6p0tFo1shCimnDYCqxEjCxPOGV4jA1HgbHCwaMaI+A0MxxWw2lmOPpoYsHpimJowWnE3LTAIWqoW+Cu2oNkgxvxaAgcHlrDhmPDIRJOM8LJQ6iWj6/UcNqYl5JBz7XyLo3YvFIbWKFM7oSlDhxuECmZtPpRXSUAmIdoRIpNRJ7uLUo4ZJsUuZ8LgbNuljRjQdABPdetmuH05VYgnntg+i0wt8sELCXs8n/9LFzIXRELHALgzH8vhV1kyQyHUThsuA0XWLHRcGXDRcEdG85YEKknxIabgUNmVZIa7sgW0reR6RGhpa36l4f0rc6tXqGlflq1/DDds02fhXL7EHIpVM/yEB3mdm3j217AHKbcWfJwjwAAAABJRU5ErkJggg==", targetHeight:0.4, previewSize:[0.41,1.0] },
+  { id:"wheelie-bug-toy", acc:"SCAN 040", name:"Wheelie Bug Toy", scan:true,
+    glb:"Wheelie%20Bug%20Toy.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAA2CAYAAAA4T5zSAAABuElEQVR42u2cSXKDQAxFOYursslWd9KddCcOlSziShcFGBqpJey3+AsPC/wfranbTI+v72lD8iv9kyxeP9+b0DXtmT8fEBCCAOhBAEAIAmAnAChG+gOYTwozAQAAlASAHJAMgCqIPuD9ALSlqK0AMcyPB6DNXa6N8Rg3CEBb4VDtFADA3Z8EQCk3awAg6SYBWDZdgCjQB1CGBgGQk6NoIDgCkMf5IRwQnAD0mk956gRgviggXACgDgAIRQUAAKEAAEJRBwBxBMDIojMJmzMEzO3oA4xQlN8JGwk5fxZk5IN7HU0ERPCm/OycGyrB2Bs+ajaAiBLVVmC0qmD80Fx29GI9w5Ae+J4Gm1+moIi86FcroOdHt//S2QoVz89tAVQvdv2SCSAiHHn/aA2+FssGkAHBDhpvg6/JLW+NiqGfIOs5tDAykX0aDIkEMA1e9neVRAHAfKcJAOHnhitAMdavbO0BgLmOPQwAkps2APgnXY3uA2i2/ouRs7lTSMI1BnFCGbofQoY9E+kujZhuaNjIoBoAcVrWnnfcLR+xM3pnKXqHSV+YXu6ozFtt773bqYirG9xrW4KYvtAPB5jrBSOD3CQAAAAASUVORK5CYII=", targetHeight:0.17, previewSize:[1.0,0.57] },
+  { id:"white-high-top", acc:"SCAN 041", name:"White High Top", scan:true,
+    glb:"White%20High%20Top.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABcCAYAAACRILDuAAACEklEQVR42u2dS27DMAxEfZYA3XSrO/FOvJMO1QBBACNogvgjDym+BZdBUj3PkKJFdbn9/C6Dot3DNsRSMfZ8yO/RB4X/A+b5fQ0Aj+jCaADQApgOQkYADgBUUB6AUQXpAwWggtoKKAvAAAAAAAAAAA4AVFAeQHolzAAgtRJmAZC2P7T3TVdHBSgAACRiLCh9Z5QqCAAAAAAAAJAdAEmYnXC9d8JT7AVmAtArALDgABoAUMBQAB4cgM0OoCcIzwRlhvcAqa1pJv+fHkDWxXcAUJ4eBmDJAXh2AJ4cQFgIFexnXY62aEBmLz/Dq6KC/4cuUav4f9j2RRX/D1uqVrcfuRoA8LlikgPoxcNHgwDAtmt0LgXQWPi39nSaReH/YiiV6/8QSRz/F5e2PP3iaorkK95tk3zF3VfsR9x9JfmKkzIAAAAAErAwD/D0i1XA0x8IAOWnYD+A/Yh3xdiPWAUAEFdD2I/YhgAgroZoPwcAgP8DAAAshrAKAoB4H0ALQtgPQgHiljQAAnRDARDghQyLIjobxGGsQAezgCCYQeNYongAkLOh4ulLpmPEo6/ZR5T8zTDE6/+zDzt3nO2eCD8wn9UubLt8/fsyXNZx9oSiXfB7T7+upim364PC1It/C3Rroq/8+ur7GlxhPXsArJPbt4tpEa4D2PB32dWKPSphC7aQI6AMvfhpmXDhRuYMP8t6nvEHJd0+gd04Q4cAAAAASUVORK5CYII=", targetHeight:0.164, previewSize:[1.0,0.96] },
+  { id:"wicker-basket", acc:"SCAN 042", name:"Wicker Basket", scan:true,
+    glb:"Wicker%20Basket%20With%20Blue%20Cloth.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFYAAABgCAYAAACHdYVHAAACe0lEQVR42u2dQXLDIAxFOUtmuulWd+JO3IlDtZtMXQ8OYCOkD3+hRTNp6jx/PkIgN7y+vgNIyG/EQ6TTz66uFwVmPkGMBcj58D4h2Gugb1jp5u9lS8BeoT4Fc/yMRLB/w36U2szU6wmqFgQTuCsN/5kjAQKsTPrSU5XrAezMSSbN+ltefDUZ3Mi4KlgxmrGn+K0HtcYV7ceDWpccLTuqdYq/76jWKardVa3qqt1VreoZgtUX8VSYVskQrIaeOAIbNUbRzjagOomF1ZaSXq7NQhUewQ63A2gfI9j/tVCvG5hDfZb+qnSNy5TpdgcbAMBmFLAZBGxEBRsJdk+wAQksysQFDTYQLMHCgI1gYKN3sJlgCRYSrNBj198xgF8gRIIlWIJFSQ0JFrAeS7Cb12Hh9ryiZQObdWrIVRfg9jci2ESwzqtwHg4YX7XJp9ME+H7t+L5ceO0cYiGCWYo9w5gd8ppUfNEAGwsq8xIJ7XysOIbZqlqVXY4dgNb8M80AW3t4DSLQXJjk1IvxV15T8iUBBfpU0Y/Bpou7LIazuSXkR09D+qRYRtlGmvJlQlWyEkIdGwSrrVqCHe/FQrCKq7wd8lMTS2BWQLCYYANhjE27aktaxgCwtIOBRfVPzcSMBzsVtRMsjJvbPwSrWIQhWIIl2C3rAwSrXIu9AsuijBJY5rMDdnhbDuIybhxfan2kE6PRAlrAUrVKYFmUIViCXXpRQI9VVmvL+VjCu3k6kWAV1NoClrnszbO0Pa2QjIFgaQcE66pvLPQ28DIa+8F6W84ZjY3MWg2/n/6F9PI2oN1L23sjUqWRAqplCeGRIp7ya1kdbM16ekMaPqur5+sHzQcrWWj/9NwAAAAASUVORK5CYII=", targetHeight:0.35, previewSize:[0.9,1.0] },
+  { id:"yarn-spool", acc:"SCAN 043", name:"Yarn Spool", scan:true,
+    glb:"Yarn%20Spool.glb", icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAABgCAYAAAB8InCYAAABCklEQVR42u3aQQ7CMAwEwLwFiQtX/2n/5D/to+ACQqgqaQjZpPZhb600cpzUlVIu11upiD2CAym1qX2QB5MAOQCnAmBFgKsBTEBPAFcFIAHhAewB8NUB+BXADmkGoBPAWgHsFG8BoCNgtwqjAFADeBRAJcDUAJwV4GoAZwAgPMCW6AGeGWBLVMCVAKiX4N8A/wbggOwCXA3AAACmBozoAVNXoEwN8AhNyKkBjALAFgCRAL4F8PBLwEgVYO4CdQ8wAc/JSAnAO8AEAL4DXA2gGoCoACQgAeptyCkApgYgAeEByiaEeh7ANJ/jkoCoAFOP5TmQJIDqo1gO8M+7I676Pd+C1F7bR0Ne798BcbBnxoULxC8AAAAASUVORK5CYII=", targetHeight:0.15, previewSize:[0.34,1.0] }
+];
+
+/* ============================================================
+   2. SCENE
+   ============================================================ */
+
+var stage   = document.getElementById("stage");
+var renderer, scene, camera, key, fill, hemi, ground, ring;
+var props = [];          // placed objects
+var selected = null;
+var needsRender = true;
+
+renderer = new THREE.WebGLRenderer({
+  antialias:true, alpha:true, preserveDrawingBuffer:true
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.physicallyCorrectLights = false;
+stage.appendChild(renderer.domElement);
+
+scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xE0E1DA, 1.3, 3.6);
+
+camera = new THREE.PerspectiveCamera(32, 1, 0.05, 30);
+
+// tabletop
+ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(6, 6),
+  new THREE.MeshStandardMaterial({ color:0xD9D7CC, roughness:0.94, metalness:0.0 })
+);
+ground.rotation.x = -Math.PI/2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// footprint ring for the selected object
+ring = new THREE.Mesh(
+  new THREE.RingGeometry(0.9, 1.0, 64),
+  new THREE.MeshBasicMaterial({ color:0x2C3E5C, transparent:true, opacity:0.75, side:THREE.DoubleSide })
+);
+ring.rotation.x = -Math.PI/2;
+ring.position.y = 0.0012;
+ring.visible = false;
+scene.add(ring);
+
+// lift handle for the selected object: drag the arrow to raise or lower it
+var lift = new THREE.Group();
+(function(){
+  var m = new THREE.MeshBasicMaterial({ color:0x2C3E5C });
+  var stem = new THREE.Mesh(new THREE.CylinderGeometry(0.0032, 0.0032, 0.14, 8), m);
+  stem.position.y = 0.07;
+  var tip = new THREE.Mesh(new THREE.ConeGeometry(0.012, 0.03, 12), m);
+  tip.position.y = 0.155;
+  var grab = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.035, 0.035, 0.21, 8),
+    new THREE.MeshBasicMaterial({ visible:false })
+  );
+  grab.position.y = 0.105;
+  lift.add(stem); lift.add(tip); lift.add(grab);
+})();
+lift.visible = false;
+scene.add(lift);
+
+key = new THREE.DirectionalLight(0xffffff, 2.4);
+key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+key.shadow.camera.left = -0.85; key.shadow.camera.right = 0.85;
+key.shadow.camera.top  =  0.85; key.shadow.camera.bottom= -0.85;
+key.shadow.camera.near = 0.2;   key.shadow.camera.far   = 8;
+key.shadow.bias = -0.0012;
+key.shadow.normalBias = 0.012;
+scene.add(key);
+scene.add(key.target);
+
+fill = new THREE.DirectionalLight(0xffffff, 0.5);
+scene.add(fill);
+
+hemi = new THREE.HemisphereLight(0xE7ECF2, 0xBFBBAA, 0.55);
+scene.add(hemi);
+
+/* ---------- backdrop: sky + floor + fog as one surface ---------- */
+var BACKDROPS = {
+  paper: { css:"radial-gradient(120% 95% at 50% 8%, #F2F2ED 0%, #E4E5DE 55%, #D4D6CE 100%)",
+           ground:0xD9D7CC, fog:0xE0E1DA, print:["#F2F2ED","#E4E5DE","#D4D6CE"] },
+  grey:  { css:"#808080", ground:0x808080, fog:0x808080, print:["#808080","#808080","#808080"] },
+  black: { css:"#000000", ground:0x000000, fog:0x000000, print:["#000000","#000000","#000000"] }
+};
+var backdrop = "paper";
+
+function applyBackdrop(name){
+  if(!BACKDROPS[name]) name = "paper";
+  backdrop = name;
+  var B = BACKDROPS[name];
+  stage.style.background = B.css;
+  ground.material.color.set(B.ground);
+  scene.fog.color.set(B.fog);
+  var ids = { paper:"bgPaper", grey:"bgGrey", black:"bgBlack" };
+  Object.keys(ids).forEach(function(k){
+    document.getElementById(ids[k]).className = "mini bgopt" + (k === name ? " on" : "");
+  });
+  needsRender = true;
+  touch();
+}
+document.getElementById("bgPaper").addEventListener("click", function(){ applyBackdrop("paper"); });
+document.getElementById("bgGrey").addEventListener("click", function(){ applyBackdrop("grey"); });
+document.getElementById("bgBlack").addEventListener("click", function(){ applyBackdrop("black"); });
+
+/* ---------- camera orbit ---------- */
+var orbit = { az: -0.62, el: 0.40, dist: 1.05, target: new THREE.Vector3(0, 0.10, 0) };
+function placeCamera(){
+  var ce = Math.cos(orbit.el), se = Math.sin(orbit.el);
+  camera.position.set(
+    orbit.target.x + Math.cos(orbit.az)*ce*orbit.dist,
+    orbit.target.y + se*orbit.dist,
+    orbit.target.z + Math.sin(orbit.az)*ce*orbit.dist
+  );
+  camera.lookAt(orbit.target);
+  needsRender = true;
+}
+
+function clampTarget(){
+  orbit.target.x = Math.max(-3, Math.min(3, orbit.target.x));
+  orbit.target.y = Math.max(-1, Math.min(2, orbit.target.y));
+  orbit.target.z = Math.max(-3, Math.min(3, orbit.target.z));
+}
+
+function resize(){
+  var w = stage.clientWidth, h = stage.clientHeight;
+  if(!w || !h) return;
+  renderer.setSize(w, h, false);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+  needsRender = true;
+}
+window.addEventListener("resize", resize);
+
+/* ============================================================
+   3. BUILDING PROPS
+   ============================================================ */
+
+function latheGeom(profile, segments){
+  var pts = profile.map(function(p){ return new THREE.Vector2(Math.max(p[0], 0.0001), p[1]); });
+  var g = new THREE.LatheGeometry(pts, segments || 64);
+  g.computeVertexNormals();
+  return g;
+}
+
+/* ---------- loaded scans (.glb) ---------- */
+var gltfLoader = (typeof THREE.GLTFLoader === "function") ? new THREE.GLTFLoader() : null;
+var scanCache = {};   // url -> Promise<THREE.Object3D>
+
+function loadScan(def, group){
+  if(!gltfLoader) return;
+  var promise = scanCache[def.glb];
+  if(!promise){
+    promise = new Promise(function(resolve, reject){
+      gltfLoader.load(def.glb, function(gltf){ resolve(gltf.scene); }, undefined, reject);
+    });
+    scanCache[def.glb] = promise;
+  }
+  promise.then(function(sourceScene){
+    var model = sourceScene.clone(true);
+    model.traverse(function(o){
+      if(o.isMesh){
+        o.castShadow = true;
+        o.receiveShadow = true;
+        if(o.material){
+          o.material = o.material.clone();
+          o.material.metalness = 0;                 // scanned surfaces read as metallic without this
+          if(o.material.roughness >= 1) o.material.roughness = 0.85;
+          o.material.side = THREE.DoubleSide;        // thin scanned geometry drops backfaces otherwise
+        }
+      }
+    });
+
+    // normalize scale to the object's real height, then rest its base on the table
+    var box = new THREE.Box3().setFromObject(model);
+    var rawSize = new THREE.Vector3(); box.getSize(rawSize);
+    var scale = rawSize.y > 0.0001 ? (def.targetHeight || 0.16) / rawSize.y : 1;
+    model.scale.setScalar(scale);
+
+    box.setFromObject(model);
+    var size = new THREE.Vector3(); box.getSize(size);
+    var center = new THREE.Vector3(); box.getCenter(center);
+    model.position.x -= center.x;
+    model.position.y -= box.min.y;
+    model.position.z -= center.z;
+
+    group.userData.radius = (Math.max(size.x, size.z) / 2) * 1.15;
+    group.add(model);
+
+    if(selected === group) updateRing();
+    needsRender = true;
+    touch();
+  }).catch(function(err){
+    console.error("Could not load scan:", def.glb, err);
+  });
+}
+
+/* ---------- the room: a studio scan that wraps around the table ---------- */
+var ENV = { url:"ALN-Studio-Scene.glb", group:null, loaded:false, loading:false, visible:false, pct:400 };
+
+function envFog(){
+  if(ENV.visible){
+    var w = ENV.pct/100;
+    scene.fog.near = Math.max(1.3, w*0.9);
+    scene.fog.far  = Math.max(3.6, w*3.2);
+  } else {
+    scene.fog.near = 1.3;
+    scene.fog.far  = 3.6;
+  }
+  needsRender = true;
+}
+
+function loadEnv(then){
+  if(ENV.loaded){ if(then) then(); return; }
+  if(ENV.loading || !gltfLoader) return;
+  ENV.loading = true;
+  gltfLoader.load(ENV.url, function(gltf){
+    var model = gltf.scene;
+    model.traverse(function(o){
+      if(o.isMesh){
+        o.receiveShadow = true;
+        if(o.material){
+          o.material.metalness = 0;
+          if(o.material.roughness >= 1) o.material.roughness = 0.9;
+        }
+      }
+    });
+    // normalize: 1 unit wide, centred on the table, floor at tabletop level
+    var box = new THREE.Box3().setFromObject(model);
+    var size = new THREE.Vector3(); box.getSize(size);
+    var k = size.x > 0.0001 ? 1/size.x : 1;
+    var inner = new THREE.Group();
+    inner.add(model);
+    model.scale.setScalar(k);
+    box.setFromObject(model);
+    var center = new THREE.Vector3(); box.getCenter(center);
+    model.position.x -= center.x;
+    model.position.z -= center.z;
+    model.position.y -= box.min.y + 0.004;   // room floor tucks just under the tabletop
+    ENV.group = inner;
+    ENV.group.visible = false;
+    scene.add(ENV.group);
+    ENV.loaded = true;
+    ENV.loading = false;
+    if(then) then();
+  }, undefined, function(err){
+    ENV.loading = false;
+    console.error("Could not load the room:", ENV.url, err);
+    alert("The room file (" + ENV.url + ") could not be loaded. Check that it is uploaded next to index.html.");
+  });
+}
+
+function applyEnv(){
+  var btn = document.getElementById("envToggle");
+  var slider = document.getElementById("envScale");
+  btn.textContent = ENV.visible ? "Hide" : "Show";
+  slider.disabled = !ENV.visible;
+  slider.value = ENV.pct;
+  document.getElementById("envsv").textContent = (ENV.pct/100).toFixed(1).replace(/\.0$/,"") + "×";
+  if(ENV.group){
+    ENV.group.visible = ENV.visible;
+    ENV.group.scale.setScalar(ENV.pct/100);
+  }
+  envFog();
+  touch();
+}
+
+/* ---------- painted skins ---------- */
+var skinCache = {};
+
+function cezanneSkin(){
+  if(skinCache.cezanne) return skinCache.cezanne;
+  var S = 512;
+  var cv = document.createElement("canvas");
+  cv.width = S; cv.height = S;
+  var c = cv.getContext("2d");
+
+  // ground: warm mid red-orange
+  c.fillStyle = "#C0492E";
+  c.fillRect(0, 0, S, S);
+
+  // broken color: short angled strokes in the painting's register,
+  // drawn thrice (x, x-S, x+S) so the wrap seam disappears
+  var palette = [
+    "#A93524", "#C24E2C", "#D4652F", "#DE8636", "#E4A63E",
+    "#D9B24A", "#B3A34E", "#8A9048", "#C33B2B", "#E1943C",
+    "#B84A2E", "#E8B84E"
+  ];
+  for(var i = 0; i < 1100; i++){
+    var px = Math.random()*S, py = Math.random()*S;
+    var w = 7 + Math.random()*22, h = 2.5 + Math.random()*7;
+    var rot = (Math.random() - 0.5) * 1.0;
+    var col = palette[(Math.random()*palette.length)|0];
+    var a = 0.10 + Math.random()*0.24;
+    [px - S, px, px + S].forEach(function(ox){
+      c.save();
+      c.translate(ox, py);
+      c.rotate(rot);
+      c.globalAlpha = a;
+      c.fillStyle = col;
+      c.beginPath();
+      c.ellipse(0, 0, w, h, 0, 0, Math.PI*2);
+      c.fill();
+      c.restore();
+    });
+  }
+
+  // a yellow-green flank, the lit side of the fruit
+  var fg = c.createRadialGradient(S*0.28, S*0.55, 0, S*0.28, S*0.55, S*0.34);
+  fg.addColorStop(0, "rgba(226,200,90,0.5)");
+  fg.addColorStop(0.6, "rgba(190,180,90,0.22)");
+  fg.addColorStop(1, "rgba(190,180,90,0)");
+  c.globalAlpha = 1;
+  c.fillStyle = fg;
+  c.fillRect(0, 0, S, S);
+
+  // deep red-brown gathering at the stem well (canvas top = apple top)
+  var tg = c.createLinearGradient(0, 0, 0, S*0.32);
+  tg.addColorStop(0, "rgba(74,36,22,0.6)");
+  tg.addColorStop(1, "rgba(74,36,22,0)");
+  c.fillStyle = tg;
+  c.fillRect(0, 0, S, S*0.32);
+
+  var t = new THREE.CanvasTexture(cv);
+  t.wrapS = THREE.RepeatWrapping;
+  t.encoding = THREE.sRGBEncoding;
+  skinCache.cezanne = t;
+  return t;
+}
+
+function buildMesh(def){
+  var group = new THREE.Group();
+  group.userData.def = def;
+  group.userData.baseScale = 1;
+  group.userData.radius = footprint(def);
+
+  if(def.glb){
+    loadScan(def, group);
+    return group;
+  }
+
+  var mat = new THREE.MeshStandardMaterial({
+    color: def.color,
+    roughness: def.rough,
+    metalness: def.metal,
+    side: def.open ? THREE.DoubleSide : THREE.FrontSide,
+    flatShading: false
+  });
+
+  if(def.skin === "cezanne"){
+    mat.map = cezanneSkin();
+    mat.color.set(0xFFFFFF);           // the map carries the color
+  }
+
+  var body;
+  if(def.box){
+    body = new THREE.Mesh(new THREE.BoxGeometry(def.box[0], def.box[1], def.box[2]), mat);
+    body.position.y = def.box[1]/2;
+  } else {
+    body = new THREE.Mesh(latheGeom(def.profile), mat);
+  }
+  body.castShadow = true;
+  body.receiveShadow = true;
+  group.add(body);
+
+  if(def.handle){
+    var h = new THREE.Mesh(
+      new THREE.TorusGeometry(def.handle.r, def.handle.t, 10, 28, Math.PI*1.35),
+      mat
+    );
+    h.rotation.z = Math.PI*1.325;      // rotates the torus's open gap to face inward, into the vessel wall, instead of out where it's visible
+    h.position.set(def.handle.x, def.handle.y, 0);
+    h.castShadow = true;
+    group.add(h);
+  }
+
+  return group;
+}
+
+function footprint(def){
+  if(def.glb) return (def.previewSize ? def.previewSize[0]/2 : 0.05) * 1.2;
+  if(def.box) return Math.max(def.box[0], def.box[2]) * 0.62;
+  var r = 0;
+  for(var i=0;i<def.profile.length;i++) r = Math.max(r, def.profile[i][0]);
+  return r * 1.18;
+}
+
+/* ---------- catalogue silhouettes for the shelf ---------- */
+function drawSilhouette(def, cv){
+  var dpr = Math.min(window.devicePixelRatio, 2);
+  var S = 58;
+  cv.width = S*dpr; cv.height = S*dpr;
+  var c = cv.getContext("2d");
+  c.scale(dpr, dpr);
+  c.clearRect(0,0,S,S);
+
+  var pad = 7, avail = S - pad*2;
+  var pts, maxR, maxY;
+
+  // scans carry a pre-rendered silhouette of the actual model
+  if(def.icon){
+    var img = new Image();
+    img.onload = function(){
+      var k2 = Math.min(avail/img.width, avail/img.height);
+      var w = img.width*k2, h = img.height*k2;
+      c.clearRect(0, 0, S, S);
+      c.drawImage(img, (S-w)/2, S - pad - h, w, h);
+    };
+    img.src = def.icon;
+    return;
+  }
+
+  if(def.glb){
+    maxR = (def.previewSize ? def.previewSize[0] : 0.5)/2; maxY = def.previewSize ? def.previewSize[1] : 1.0;
+    pts = [[0,0],[maxR,0],[maxR,maxY],[0,maxY]];
+  } else if(def.box){
+    maxR = def.box[0]/2; maxY = def.box[1];
+    pts = [[0,0],[maxR,0],[maxR,maxY],[0,maxY]];
+  } else {
+    pts = def.profile;
+    maxR = 0; maxY = 0;
+    for(var i=0;i<pts.length;i++){ maxR = Math.max(maxR, pts[i][0]); maxY = Math.max(maxY, pts[i][1]); }
+  }
+  var k = Math.min(avail/(maxR*2), avail/maxY);
+  var cx = S/2, base = S - pad;
+
+  c.beginPath();
+  c.moveTo(cx + pts[0][0]*k, base - pts[0][1]*k);
+  for(var j=1;j<pts.length;j++) c.lineTo(cx + pts[j][0]*k, base - pts[j][1]*k);
+  for(var m=pts.length-1;m>=0;m--) c.lineTo(cx - pts[m][0]*k, base - pts[m][1]*k);
+  c.closePath();
+  c.fillStyle = "rgba(34,37,42,.80)";
+  c.fill();
+
+  // centre line, the way a profile drawing marks the axis of rotation
+  if(!def.box && !def.glb){
+    c.strokeStyle = "rgba(247,247,243,.55)";
+    c.setLineDash([2,3]);
+    c.lineWidth = 1;
+    c.beginPath(); c.moveTo(cx, base - maxY*k); c.lineTo(cx, base); c.stroke();
+    c.setLineDash([]);
+  }
+}
+
+/* ---------- shelf UI ---------- */
+/* Each tile reads Title / Contributor / Description. Clicking the icon
+   places the object; clicking the text opens the contributor and
+   description for editing. Edits persist in storage under sls:meta. */
+var META_KEY = "sls:meta";
+var itemMeta = {};
+
+function saveMeta(){ Store.set(META_KEY, JSON.stringify(itemMeta)); }
+
+var shelf = document.getElementById("shelf");
+LIBRARY.forEach(function(def){
+  var b = document.createElement("div");
+  b.className = "item";
+
+  var place = document.createElement("button");
+  place.className = "itemplace";
+  place.title = "Set " + def.name.toLowerCase() + " on the table";
+  var cv = document.createElement("canvas");
+  drawSilhouette(def, cv);
+  place.appendChild(cv);
+  place.addEventListener("click", function(){ addProp(def); });
+
+  var nm = document.createElement("span"); nm.className = "nm"; nm.textContent = def.name;
+  nm.title = "Click to add contributor and description";
+  var by = document.createElement("span");
+  var ds = document.createElement("span");
+  var ac = document.createElement("span"); ac.className = "acc"; ac.textContent = def.acc;
+
+  function renderMeta(){
+    var m = itemMeta[def.id] || {};
+    by.textContent = m.by || "add contributor";
+    by.className = "by" + (m.by ? "" : " empty");
+    ds.textContent = m.desc || "add description";
+    ds.className = "ds" + (m.desc ? "" : " empty");
+  }
+  renderMeta();
+  def._renderMeta = renderMeta;
+
+  function edit(){
+    if(b.querySelector("input")) return;
+    var m = itemMeta[def.id] || {};
+    var inBy = document.createElement("input");
+    inBy.className = "metain"; inBy.placeholder = "Contributor name"; inBy.value = m.by || "";
+    var inDs = document.createElement("input");
+    inDs.className = "metain"; inDs.placeholder = "Description"; inDs.value = m.desc || "";
+    by.replaceWith(inBy); ds.replaceWith(inDs);
+    var closed = false;
+    function done(save){
+      if(closed) return;
+      closed = true;
+      if(save !== false){
+        itemMeta[def.id] = { by: inBy.value.trim(), desc: inDs.value.trim() };
+        saveMeta();
+      }
+      inBy.replaceWith(by); inDs.replaceWith(ds);
+      renderMeta();
+    }
+    [inBy, inDs].forEach(function(inp){
+      inp.addEventListener("keydown", function(e){
+        if(e.key === "Enter"){ e.preventDefault(); done(); }
+        if(e.key === "Escape"){ done(false); }
+      });
+      inp.addEventListener("blur", function(){
+        setTimeout(function(){
+          if(document.activeElement !== inBy && document.activeElement !== inDs) done();
+        }, 120);
+      });
+    });
+    inBy.focus();
+  }
+  nm.addEventListener("click", edit);
+  by.addEventListener("click", edit);
+  ds.addEventListener("click", edit);
+
+  b.appendChild(place); b.appendChild(nm); b.appendChild(by); b.appendChild(ds); b.appendChild(ac);
+  shelf.appendChild(b);
+});
+document.getElementById("count").textContent = LIBRARY.length;
+
+/* ---------- placing ---------- */
+var placeIndex = 0;
+function addProp(def){
+  var g = buildMesh(def);
+  var a = placeIndex * 2.399963;              // golden-angle spiral, so nothing lands on top of itself
+  var r = 0.055 * Math.sqrt(placeIndex + 0.6);
+  g.position.set(Math.cos(a)*r, 0, Math.sin(a)*r);
+  g.rotation.y = Math.random() * Math.PI * 2;
+  placeIndex++;
+  scene.add(g);
+  props.push(g);
+  select(g);
+  document.getElementById("hint").style.display = "none";
+  needsRender = true;
+  touch();
+}
+
+function removeProp(g){
+  scene.remove(g);
+  g.traverse(function(o){
+    if(o.geometry) o.geometry.dispose();
+    if(o.material) o.material.dispose();
+  });
+  props.splice(props.indexOf(g), 1);
+  if(selected === g) select(null);
+  needsRender = true;
+  touch();
+}
+
+/* ---------- selection ---------- */
+var selbar  = document.getElementById("selbar");
+var selname = document.getElementById("selname");
+var rotEl   = document.getElementById("rot");
+var sclEl   = document.getElementById("scl");
+
+function select(g){
+  selected = g;
+  if(!g){
+    selbar.classList.remove("on");
+    ring.visible = false;
+    lift.visible = false;
+    needsRender = true;
+    return;
+  }
+  selbar.classList.add("on");
+  selname.textContent = g.userData.def.name;
+  rotEl.value = Math.round((g.rotation.y * 180/Math.PI + 3600) % 360);
+  sclEl.value = Math.round(g.scale.x * 100);
+  updateRing();
+}
+
+function updateRing(){
+  if(!selected){ ring.visible = false; lift.visible = false; return; }
+  var r = selected.userData.radius * selected.scale.x;
+  ring.scale.set(r, r, r);
+  ring.position.x = selected.position.x;
+  ring.position.z = selected.position.z;
+  ring.visible = true;
+
+  var box = new THREE.Box3().setFromObject(selected);
+  var top = isFinite(box.max.y) ? box.max.y : selected.position.y + 0.1;
+  lift.position.set(selected.position.x, top + 0.015, selected.position.z);
+  lift.visible = true;
+  needsRender = true;
+}
+
+rotEl.addEventListener("input", function(){
+  if(!selected) return;
+  selected.rotation.y = rotEl.value * Math.PI/180;
+  needsRender = true;
+  touch();
+});
+sclEl.addEventListener("input", function(){
+  if(!selected) return;
+  var s = sclEl.value/100;
+  selected.scale.set(s, s, s);
+  updateRing();
+  touch();
+});
+document.getElementById("rm").addEventListener("click", function(){
+  if(selected) removeProp(selected);
+});
+
+/* ============================================================
+   4. POINTER: drag props on the tabletop, drag the room to orbit
+   ============================================================ */
+
+var ray = new THREE.Raycaster();
+var ndc = new THREE.Vector2();
+var tablePlane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
+var hitPoint = new THREE.Vector3();
+var drag = null;
+
+function toNDC(e){
+  var r = renderer.domElement.getBoundingClientRect();
+  ndc.x = ((e.clientX - r.left)/r.width)*2 - 1;
+  ndc.y = -((e.clientY - r.top)/r.height)*2 + 1;
+}
+
+function pick(e){
+  toNDC(e);
+  ray.setFromCamera(ndc, camera);
+  var hits = ray.intersectObjects(props, true);
+  if(!hits.length) return null;
+  var o = hits[0].object;
+  while(o && props.indexOf(o) === -1) o = o.parent;
+  return o;
+}
+
+var liftPlane = new THREE.Plane();
+
+renderer.domElement.addEventListener("pointerdown", function(e){
+  renderer.domElement.setPointerCapture(e.pointerId);
+  toNDC(e);
+  ray.setFromCamera(ndc, camera);
+
+  // the lift handle wins over everything else
+  if(selected && lift.visible && ray.intersectObjects(lift.children, true).length){
+    var n = new THREE.Vector3();
+    camera.getWorldDirection(n);
+    n.y = 0;
+    if(n.lengthSq() < 0.0001) n.set(0, 0, 1);
+    n.normalize();
+    liftPlane.setFromNormalAndCoplanarPoint(n, lift.position);
+    var p0 = new THREE.Vector3();
+    ray.ray.intersectPlane(liftPlane, p0);
+    drag = { mode:"lift", obj:selected, y0:selected.position.y, hy:p0 ? p0.y : lift.position.y };
+    return;
+  }
+
+  var hit = pick(e);
+  if(hit){
+    select(hit);
+    ray.setFromCamera(ndc, camera);
+    ray.ray.intersectPlane(tablePlane, hitPoint);
+    drag = { mode:"move", obj:hit,
+             off:new THREE.Vector3().subVectors(hit.position, hitPoint) };
+  } else {
+    select(null);
+    var pan = e.shiftKey || e.button === 1 || e.button === 2;
+    drag = { mode: pan ? "pan" : "orbit", x:e.clientX, y:e.clientY };
+  }
+});
+renderer.domElement.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+
+renderer.domElement.addEventListener("pointermove", function(e){
+  if(!drag) return;
+  if(drag.mode === "lift"){
+    toNDC(e);
+    ray.setFromCamera(ndc, camera);
+    var p = new THREE.Vector3();
+    if(ray.ray.intersectPlane(liftPlane, p)){
+      drag.obj.position.y = Math.max(-0.8, Math.min(0.8, drag.y0 + (p.y - drag.hy)));
+      updateRing();
+    }
+  } else if(drag.mode === "move"){
+    toNDC(e);
+    ray.setFromCamera(ndc, camera);
+    if(ray.ray.intersectPlane(tablePlane, hitPoint)){
+      var keepY = drag.obj.position.y;
+      drag.obj.position.copy(hitPoint).add(drag.off);
+      drag.obj.position.y = keepY;                   // height only changes via the lift handle
+      var lim = 0.62;
+      drag.obj.position.x = Math.max(-lim, Math.min(lim, drag.obj.position.x));
+      drag.obj.position.z = Math.max(-lim, Math.min(lim, drag.obj.position.z));
+      updateRing();
+    }
+  } else if(drag.mode === "pan"){
+    var pr = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
+    var pu = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
+    var pk = 0.0012 * orbit.dist;
+    orbit.target.addScaledVector(pr, -(e.clientX - drag.x) * pk);
+    orbit.target.addScaledVector(pu,  (e.clientY - drag.y) * pk);
+    clampTarget();
+    drag.x = e.clientX; drag.y = e.clientY;
+    placeCamera();
+  } else {
+    orbit.az -= (e.clientX - drag.x) * 0.006;
+    orbit.el = Math.max(0.06, Math.min(1.30, orbit.el + (e.clientY - drag.y) * 0.005));
+    drag.x = e.clientX; drag.y = e.clientY;
+    placeCamera();
+  }
+});
+
+function endDrag(e){
+  drag = null;
+  touch();
+  try{ renderer.domElement.releasePointerCapture(e.pointerId); }catch(err){}
+}
+renderer.domElement.addEventListener("pointerup", endDrag);
+renderer.domElement.addEventListener("pointercancel", endDrag);
+
+renderer.domElement.addEventListener("wheel", function(e){
+  e.preventDefault();
+  orbit.dist = Math.max(0.42, Math.min(2.4, orbit.dist * (1 + Math.sign(e.deltaY)*0.08)));
+  placeCamera();
+  touch();
+}, { passive:false });
+
+document.addEventListener("keydown", function(e){
+  var t = e.target.tagName;
+  if(t === "INPUT" || t === "TEXTAREA") return;
+  if(e.target && e.target.id === "pad") return;     // the light pad uses its own arrows
+  if((e.key === "Delete" || e.key === "Backspace") && selected){
+    e.preventDefault(); removeProp(selected);
+  }
+  if(e.key === "Escape") select(null);
+  if(e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === "ArrowDown"){
+    e.preventDefault();
+    var pr = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
+    var pu = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
+    var step = 0.06 * orbit.dist;
+    if(e.key === "ArrowLeft")  orbit.target.addScaledVector(pr, -step);
+    if(e.key === "ArrowRight") orbit.target.addScaledVector(pr,  step);
+    if(e.key === "ArrowUp")    orbit.target.addScaledVector(pu,  step);
+    if(e.key === "ArrowDown")  orbit.target.addScaledVector(pu, -step);
+    clampTarget();
+    placeCamera();
+    touch();
+  }
+});
+
+/* ============================================================
+   5. THE LIGHT
+   ============================================================ */
+
+var L = { nx:-0.36, nz:-0.40, warm:46, inten:58, soft:45, bounce:26 };
+
+function kelvinToRGB(k){
+  var t = k/100, r, g, b;
+  if(t <= 66){ r = 255; }
+  else { r = 329.7 * Math.pow(t - 60, -0.1332); }
+  if(t <= 66){ g = 99.47 * Math.log(t) - 161.12; }
+  else { g = 288.12 * Math.pow(t - 60, -0.0755); }
+  if(t >= 66){ b = 255; }
+  else if(t <= 19){ b = 0; }
+  else { b = 138.52 * Math.log(t - 10) - 305.04; }
+  var cl = function(v){ return Math.max(0, Math.min(255, v))/255; };
+  return new THREE.Color(cl(r), cl(g), cl(b));
+}
+
+function describeDirection(nx, nz){
+  var r = Math.sqrt(nx*nx + nz*nz);
+  if(r < 0.22) return "almost overhead";
+  var side = nx < -0.18 ? "from the left" : (nx > 0.18 ? "from the right" : "from straight on");
+  var kind = r > 0.74 ? "low raking light" : (nz > 0.35 ? "back light" : "side light");
+  return kind + ", " + side;
+}
+
+function applyLight(){
+  var r  = Math.min(1, Math.sqrt(L.nx*L.nx + L.nz*L.nz));
+  var az = Math.atan2(L.nz, L.nx);
+  var el = THREE.MathUtils.degToRad(8 + (1 - r) * 78);
+  var d  = 3.0;
+
+  key.position.set(Math.cos(az)*Math.cos(el)*d, Math.sin(el)*d, Math.sin(az)*Math.cos(el)*d);
+  key.target.position.set(0, 0.06, 0);
+  key.target.updateMatrixWorld();
+
+  var kelvin = 2700 + (L.warm/100) * 5300;         // warm lamp through to cool north light
+  var col = kelvinToRGB(kelvin);
+  key.color.copy(col);
+  key.intensity = 0.5 + (L.inten/100) * 3.4;
+  key.shadow.radius = 1 + (L.soft/100) * 11;
+
+  fill.position.set(-key.position.x, Math.max(0.7, key.position.y*0.45), -key.position.z);
+  fill.color.set(0xF2F4F8);
+  fill.intensity = (L.bounce/100) * 1.5;
+
+  hemi.intensity = 0.28 + (L.bounce/100) * 0.5;
+
+  // the light puck is the one warm thing in the interface
+  document.getElementById("puck").style.background = "#" + col.getHexString();
+  document.getElementById("padval").textContent = describeDirection(L.nx, L.nz);
+  document.getElementById("wv").textContent = Math.round(kelvin/50)*50 + "K";
+  document.getElementById("iv").textContent = L.inten < 34 ? "dim" : (L.inten < 70 ? "medium" : "strong");
+  document.getElementById("sv").textContent = L.soft < 30 ? "hard edged" : (L.soft < 70 ? "soft" : "very diffuse");
+  document.getElementById("bv").textContent = L.bounce < 15 ? "none" : (L.bounce < 55 ? "low" : "strong");
+
+  needsRender = true;
+  touch();
+}
+
+/* ---------- the plan pad ---------- */
+var pad = document.getElementById("pad"), puck = document.getElementById("puck");
+function setPuckFromEvent(e){
+  var r = pad.getBoundingClientRect();
+  var nx = ((e.clientX - r.left)/r.width)*2 - 1;
+  var nz = ((e.clientY - r.top)/r.height)*2 - 1;
+  var len = Math.sqrt(nx*nx + nz*nz);
+  if(len > 1){ nx /= len; nz /= len; }
+  L.nx = nx; L.nz = nz;
+  puck.style.left = ((nx+1)/2*100) + "%";
+  puck.style.top  = ((nz+1)/2*100) + "%";
+  applyLight();
+}
+var padding = false;
+pad.addEventListener("pointerdown", function(e){
+  padding = true; pad.setPointerCapture(e.pointerId); setPuckFromEvent(e);
+});
+pad.addEventListener("pointermove", function(e){ if(padding) setPuckFromEvent(e); });
+pad.addEventListener("pointerup", function(e){
+  padding = false;
+  try{ pad.releasePointerCapture(e.pointerId); }catch(err){}
+});
+pad.addEventListener("keydown", function(e){
+  var step = 0.08, moved = true;
+  if(e.key === "ArrowLeft") L.nx -= step;
+  else if(e.key === "ArrowRight") L.nx += step;
+  else if(e.key === "ArrowUp") L.nz -= step;
+  else if(e.key === "ArrowDown") L.nz += step;
+  else moved = false;
+  if(moved){
+    e.preventDefault();
+    var len = Math.sqrt(L.nx*L.nx + L.nz*L.nz);
+    if(len > 1){ L.nx /= len; L.nz /= len; }
+    puck.style.left = ((L.nx+1)/2*100) + "%";
+    puck.style.top  = ((L.nz+1)/2*100) + "%";
+    applyLight();
+  }
+});
+
+["warm","inten","soft","bounce"].forEach(function(k){
+  document.getElementById(k === "warm" ? "warm" : k).addEventListener("input", function(e){
+    L[k] = +e.target.value;
+    applyLight();
+  });
+});
+
+/* ============================================================
+   6. PRINT
+   ============================================================ */
+
+document.getElementById("print").addEventListener("click", function(){
+  var wasSelected = selected;
+  select(null);                         // the footprint ring is a tool, not part of the picture
+  renderer.render(scene, camera);
+
+  var w = renderer.domElement.width, h = renderer.domElement.height;
+  var target = 2600;
+  var mult = Math.max(1, Math.min(3, target / Math.max(w, h)));
+  var pw = Math.round(w*mult), ph = Math.round(h*mult);
+
+  var url = null;
+  try{
+    var oldPR = renderer.getPixelRatio();
+    renderer.setPixelRatio(oldPR * mult);
+    renderer.setSize(stage.clientWidth, stage.clientHeight, false);
+    renderer.render(scene, camera);
+    url = composite(renderer.domElement);
+    renderer.setPixelRatio(oldPR);
+    resize();
+    renderer.render(scene, camera);
+  }catch(err){
+    resize();
+    renderer.render(scene, camera);
+    url = composite(renderer.domElement);
+  }
+
+  if(wasSelected) select(wasSelected);
+  openPrintWindow(url);
+});
+
+function composite(glCanvas){
+  var c = document.createElement("canvas");
+  c.width = glCanvas.width; c.height = glCanvas.height;
+  var x = c.getContext("2d");
+  var B = BACKDROPS[backdrop] || BACKDROPS.paper;
+  var g = x.createRadialGradient(c.width*0.5, c.height*0.08, 0, c.width*0.5, c.height*0.08, c.height*1.15);
+  g.addColorStop(0, B.print[0]); g.addColorStop(0.55, B.print[1]); g.addColorStop(1, B.print[2]);
+  x.fillStyle = g; x.fillRect(0,0,c.width,c.height);
+  x.drawImage(glCanvas, 0, 0);
+  return c.toDataURL("image/png");
+}
+
+function openPrintWindow(dataURL){
+  var title = document.getElementById("title").value.trim() || "Untitled arrangement";
+  var names = props.map(function(p){ return p.userData.def.name; });
+  var counts = {};
+  names.forEach(function(n){ counts[n] = (counts[n]||0)+1; });
+  var listing = Object.keys(counts).map(function(n){
+    return counts[n] > 1 ? n.toLowerCase() + " (" + counts[n] + ")" : n.toLowerCase();
+  }).join(", ") || "no objects";
+  var date = new Date().toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" });
+
+  var w = window.open("", "_blank");
+  if(!w){ alert("Your browser blocked the print window. Allow pop-ups for this page and press Print again."); return; }
+  w.document.write(
+    '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + escapeHTML(title) + '</title>' +
+    '<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600&family=Spectral:ital,wght@0,400;1,400&display=swap" rel="stylesheet">' +
+    '<style>' +
+    '@page{margin:14mm}' +
+    'html,body{margin:0;background:#fff;color:#22252A;font-family:Archivo,system-ui,sans-serif}' +
+    '.sheet{max-width:190mm;margin:0 auto;padding:10mm 0}' +
+    'img{width:100%;height:auto;display:block}' +
+    '.cap{margin-top:7mm;border-top:1px solid #C9C9C0;padding-top:4mm;display:flex;justify-content:space-between;gap:16px;align-items:baseline}' +
+    '.t{font-family:Spectral,Georgia,serif;font-style:italic;font-size:15pt}' +
+    '.m{font-size:7.5pt;letter-spacing:.13em;text-transform:uppercase;color:#6E7580;text-align:right;line-height:1.7}' +
+    '.objs{font-size:8.5pt;color:#6E7580;margin-top:2mm}' +
+    '@media print{.no{display:none}}' +
+    '.no{position:fixed;top:12px;right:12px;background:#22252A;color:#fff;border:0;border-radius:2px;padding:9px 16px;font:600 10px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}' +
+    '</style></head><body>' +
+    '<button class="no" onclick="window.print()">Send to printer</button>' +
+    '<div class="sheet"><img src="' + dataURL + '" alt="' + escapeHTML(title) + '">' +
+    '<div class="cap"><div><div class="t">' + escapeHTML(title) + '</div>' +
+    '<div class="objs">' + escapeHTML(listing) + '</div></div>' +
+    '<div class="m">Surro: Still Life Studio<br>' + date + '</div></div></div>' +
+    '<script>var i=document.images[0];i.complete?setTimeout(function(){window.print()},350):i.onload=function(){setTimeout(function(){window.print()},350)}<\/script>' +
+    '</body></html>'
+  );
+  w.document.close();
+}
+
+function escapeHTML(s){
+  return String(s).replace(/[&<>"]/g, function(c){
+    return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[c];
+  });
+}
+
+/* ============================================================
+   6b. SAVING
+   One shape of data throughout. window.storage when it exists,
+   the browser's own storage otherwise, and a .json file when a
+   student needs the work to travel between machines.
+   ============================================================ */
+
+var Store = (function(){
+  var W = (typeof window !== "undefined" && window.storage) ? window.storage : null;
+  return {
+    get: function(k){
+      if(W) return W.get(k).then(function(r){ return r ? r.value : null; }).catch(function(){ return null; });
+      try{ return Promise.resolve(localStorage.getItem(k)); }catch(e){ return Promise.resolve(null); }
+    },
+    set: function(k, v){
+      if(W) return W.set(k, v).catch(function(){ return null; });
+      try{ localStorage.setItem(k, v); }catch(e){}
+      return Promise.resolve();
+    }
+  };
+})();
+
+var K_CURRENT = "sls:current", K_PLATES = "sls:plates";
+var booted = false, plates = [], saveTimer = null;
+
+function serialize(){
+  return {
+    version: 1,
+    backdrop: backdrop,
+    title: document.getElementById("title").value.trim(),
+    saved: new Date().toISOString(),
+    camera: { az:+orbit.az.toFixed(4), el:+orbit.el.toFixed(4), dist:+orbit.dist.toFixed(4),
+              tx:+orbit.target.x.toFixed(4), ty:+orbit.target.y.toFixed(4), tz:+orbit.target.z.toFixed(4) },
+    light:  { nx:+L.nx.toFixed(4), nz:+L.nz.toFixed(4), warm:L.warm, inten:L.inten, soft:L.soft, bounce:L.bounce },
+    env:    { on: ENV.visible, s: ENV.pct },
+    objects: props.map(function(p){
+      return { asset:p.userData.def.id,
+               x:+p.position.x.toFixed(4), z:+p.position.z.toFixed(4),
+               y:+p.position.y.toFixed(4),
+               ry:+p.rotation.y.toFixed(4), s:+p.scale.x.toFixed(3) };
+    })
+  };
+}
+
+function deserialize(d){
+  if(!d || !Array.isArray(d.objects)) return false;
+  props.slice().forEach(removeProp);
+  placeIndex = 0;
+  document.getElementById("title").value = d.title || "";
+  d.objects.forEach(function(o){
+    var def = null;
+    for(var i=0;i<LIBRARY.length;i++){ if(LIBRARY[i].id === o.asset){ def = LIBRARY[i]; break; } }
+    if(!def) return;                          // a scan that has since left the collection
+    var g = buildMesh(def);
+    g.position.set(o.x||0, o.y||0, o.z||0);
+    g.rotation.y = o.ry||0;
+    var s = o.s || 1; g.scale.set(s, s, s);
+    scene.add(g); props.push(g); placeIndex++;
+  });
+  if(d.light){ ["nx","nz","warm","inten","soft","bounce"].forEach(function(k){
+    if(typeof d.light[k] === "number") L[k] = d.light[k];
+  }); syncLightUI(); }
+  if(d.camera && typeof d.camera.az === "number"){
+    orbit.az = d.camera.az; orbit.el = d.camera.el; orbit.dist = d.camera.dist;
+    if(typeof d.camera.tx === "number") orbit.target.set(d.camera.tx, d.camera.ty, d.camera.tz);
+    placeCamera();
+  }
+  if(d.env){
+    ENV.pct = (typeof d.env.s === "number") ? Math.max(150, Math.min(900, d.env.s)) : ENV.pct;
+    if(d.env.on){ loadEnv(function(){ ENV.visible = true; applyEnv(); }); }
+    else { ENV.visible = false; applyEnv(); }
+  }
+  applyBackdrop(d.backdrop || "paper");
+  select(null);
+  document.getElementById("hint").style.display = props.length ? "none" : "";
+  needsRender = true;
+  return true;
+}
+
+function syncLightUI(){
+  var p = document.getElementById("puck");
+  p.style.left = ((L.nx+1)/2*100) + "%";
+  p.style.top  = ((L.nz+1)/2*100) + "%";
+  ["warm","inten","soft","bounce"].forEach(function(k){ document.getElementById(k).value = L[k]; });
+  applyLight();
+}
+
+function touch(){
+  if(!booted) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function(){ Store.set(K_CURRENT, JSON.stringify(serialize())); }, 500);
+}
+
+/* ---------- plates ---------- */
+function persistPlates(){ Store.set(K_PLATES, JSON.stringify(plates)); }
+
+function renderPlates(){
+  var el = document.getElementById("plates");
+  el.innerHTML = "";
+  if(!plates.length){
+    var e = document.createElement("p");
+    e.className = "empty";
+    e.textContent = "Nothing saved yet. Arrange something, then press Save this one to keep it.";
+    el.appendChild(e);
+    return;
+  }
+  plates.forEach(function(p, i){
+    var row = document.createElement("div"); row.className = "plate";
+
+    var open = document.createElement("button"); open.className = "plateopen";
+    var n = document.createElement("span"); n.className = "pn"; n.textContent = "Plate " + (i+1);
+    var t = document.createElement("span"); t.className = "pt"; t.textContent = p.title || "Untitled arrangement";
+    var dd = document.createElement("span"); dd.className = "pd";
+    dd.textContent = p.objects.length + " objects, " +
+      new Date(p.saved).toLocaleString(undefined, { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
+    open.appendChild(n); open.appendChild(t); open.appendChild(dd);
+    open.addEventListener("click", function(){ deserialize(p); touch(); });
+
+    var x = document.createElement("button"); x.className = "platex"; x.textContent = "×";
+    x.setAttribute("aria-label", "Remove plate " + (i+1));
+    x.addEventListener("click", function(){ plates.splice(i,1); persistPlates(); renderPlates(); });
+
+    row.appendChild(open); row.appendChild(x);
+    el.appendChild(row);
+  });
+}
+
+document.getElementById("savePlate").addEventListener("click", function(){
+  plates.push(serialize());
+  if(plates.length > 50) plates.shift();
+  persistPlates(); renderPlates();
+});
+
+document.getElementById("clearTable").addEventListener("click", function(){
+  if(!props.length) return;
+  if(!confirm("Remove everything from the table?")) return;
+  props.slice().forEach(removeProp);
+});
+
+document.getElementById("envToggle").addEventListener("click", function(){
+  if(!ENV.visible){
+    loadEnv(function(){ ENV.visible = true; applyEnv(); });
+  } else {
+    ENV.visible = false; applyEnv();
+  }
+});
+document.getElementById("envScale").addEventListener("input", function(e){
+  ENV.pct = +e.target.value;
+  applyEnv();
+});
+
+document.getElementById("exportBtn").addEventListener("click", function(){
+  var d = serialize();
+  var name = (d.title || "arrangement").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase() || "arrangement";
+  var blob = new Blob([JSON.stringify(d, null, 2)], { type:"application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name + ".json";
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 600);
+});
+
+document.getElementById("importBtn").addEventListener("click", function(){
+  document.getElementById("fileIn").click();
+});
+document.getElementById("fileIn").addEventListener("change", function(e){
+  var f = e.target.files[0];
+  e.target.value = "";
+  if(!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    var ok = false;
+    try{ ok = deserialize(JSON.parse(r.result)); }catch(err){ ok = false; }
+    if(ok) touch();
+    else alert("That file is not an arrangement this can open. Look for a .json saved by Export file.");
+  };
+  r.readAsText(f);
+});
+
+document.getElementById("title").addEventListener("input", touch);
+
+/* ============================================================
+   7. LOOP
+   ============================================================ */
+
+function tick(){
+  requestAnimationFrame(tick);
+  if(needsRender){ renderer.render(scene, camera); needsRender = false; }
+}
+
+resize();
+placeCamera();
+applyLight();
+applyBackdrop("paper");
+renderPlates();
+
+Store.get(META_KEY).then(function(v){
+  if(v){ try{ itemMeta = JSON.parse(v) || {}; }catch(e){ itemMeta = {}; } }
+  LIBRARY.forEach(function(d){ if(d._renderMeta) d._renderMeta(); });
+});
+
+Store.get(K_PLATES).then(function(v){
+  if(v){ try{ plates = JSON.parse(v) || []; }catch(e){ plates = []; } }
+  renderPlates();
+});
+
+Store.get(K_CURRENT).then(function(v){
+  var restored = false;
+  if(v){ try{ restored = deserialize(JSON.parse(v)); }catch(e){ restored = false; } }
+  if(!restored){
+    addProp(LIBRARY[5]);   // jug
+    addProp(LIBRARY[0]);   // pear
+    addProp(LIBRARY[1]);   // apple
+    select(null);
+  }
+  document.getElementById("hint").style.display = props.length ? "none" : "";
+  booted = true;
+  needsRender = true;
+});
+
+tick();
+
+})();
+</script>
+</body>
+</html>
