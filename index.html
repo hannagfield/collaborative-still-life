@@ -540,17 +540,17 @@ var ROT_AXES = { x:new THREE.Vector3(1,0,0), y:new THREE.Vector3(0,1,0), z:new T
     });
   });
 })();
-// slide arrows: double-headed, one per horizontal axis, colored like their rings
+// slide arrows: thin blue, matching the vertical lift handle
 (function(){
-  [{ axis:"x", color:0x8C3A2E, rz:Math.PI/2, rx:0 },
-   { axis:"z", color:0x5F7A4A, rz:0, rx:Math.PI/2 }].forEach(function(d){
-    var m = new THREE.MeshBasicMaterial({ color:d.color, transparent:true, opacity:0.9 });
+  [{ axis:"x", rz:Math.PI/2, rx:0 },
+   { axis:"z", rz:0, rx:Math.PI/2 }].forEach(function(d){
+    var m = new THREE.MeshBasicMaterial({ color:0x2C3E5C });
     var parts = [];
-    var shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 2.6, 8), m);
+    var shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 2.6, 8), m);
     parts.push(shaft);
     [1, -1].forEach(function(s){
-      var tip = new THREE.Mesh(new THREE.ConeGeometry(0.085, 0.22, 10), m);
-      tip.position.y = s * 1.41;
+      var tip = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.16, 10), m);
+      tip.position.y = s * 1.38;
       if(s < 0) tip.rotation.x = Math.PI;
       parts.push(tip);
     });
@@ -1168,6 +1168,7 @@ renderer.domElement.addEventListener("pointermove", function(e){
       var cr = new THREE.Vector3().crossVectors(drag.v0, v1);
       var ang = Math.atan2(cr.dot(drag.ax), drag.v0.dot(v1));
       drag.obj.rotateOnWorldAxis(drag.ax, ang);
+      rotGizmo.rotateOnWorldAxis(drag.ax, ang);
       drag.v0 = v1;
       rotEl.value = Math.round((drag.obj.rotation.y * 180/Math.PI + 3600) % 360);
       needsRender = true;
@@ -1212,7 +1213,9 @@ renderer.domElement.addEventListener("pointermove", function(e){
 function endDrag(e){
   delete touches[e.pointerId];
   if(pinch && touchList().length < 2) pinch = null;
+  rotGizmo.rotation.set(0, 0, 0);
   drag = null;
+  needsRender = true;
   touch();
   try{ renderer.domElement.releasePointerCapture(e.pointerId); }catch(err){}
 }
