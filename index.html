@@ -259,9 +259,36 @@
     .shelf{grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
     .panel-body{max-height:200px}
   }
+
+  /* ---------- phone notice ---------- */
+  #phoneNotice{
+    position:fixed;inset:0;z-index:60;display:none;
+    background:var(--paper);
+    flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:28px 24px;gap:14px;
+  }
+  #phoneNotice .brand{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  #phoneNotice h1{font-family:"Spectral",Georgia,serif;font-weight:500;font-size:26px;line-height:1.25;margin:0;color:var(--ink);max-width:340px}
+  #phoneNotice p{font-family:"Spectral",Georgia,serif;font-style:italic;font-size:14.5px;line-height:1.5;color:var(--muted);margin:0;max-width:320px}
+  #phoneNotice .btns{display:flex;flex-direction:column;gap:10px;margin-top:10px;width:100%;max-width:280px}
+  #phoneNotice button{
+    font:600 11px/1 Archivo,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;
+    padding:14px 18px;border-radius:3px;cursor:pointer;
+  }
+  #phoneNotice .copyLink{background:var(--accent);color:#fff;border:0}
+  #phoneNotice .anyway{background:transparent;color:var(--muted);border:1px solid var(--rule)}
 </style>
 </head>
 <body>
+<div id="phoneNotice" role="dialog" aria-label="Best on a larger screen">
+  <span class="brand">Surro &mdash; Still Life Studio</span>
+  <h1>This studio works best on a computer or tablet.</h1>
+  <p>Arranging and lighting objects needs a bigger table. Copy the link and open it on a larger screen when you can.</p>
+  <div class="btns">
+    <button class="copyLink" id="phoneCopy">Copy link</button>
+    <button class="anyway" id="phoneAnyway">Continue on phone</button>
+  </div>
+</div>
 <div class="app">
   <header>
     <div class="wordmark">Surro<em>: Still Life Studio</em></div>
@@ -2019,6 +2046,32 @@ applyLight();
 applyBackdrop("paper");
 syncZoomUI();
 renderPlates();
+
+/* ---------- phone notice: suggest a bigger screen, never block ---------- */
+(function(){
+  var el = document.getElementById("phoneNotice");
+  var isPhone = window.matchMedia("(pointer:coarse)").matches &&
+                Math.min(screen.width, screen.height) < 500;
+  var dismissed = false;
+  try{ dismissed = sessionStorage.getItem("sls:phoneOk") === "1"; }catch(e){}
+  if(!isPhone || dismissed) return;
+  el.style.display = "flex";
+  document.getElementById("phoneAnyway").addEventListener("click", function(){
+    el.style.display = "none";
+    try{ sessionStorage.setItem("sls:phoneOk", "1"); }catch(e){}
+    needsRender = true;
+  });
+  document.getElementById("phoneCopy").addEventListener("click", function(){
+    var url = location.href.split("#")[0];
+    var btn = this;
+    function ok(){ btn.textContent = "Link copied"; setTimeout(function(){ btn.textContent = "Copy link"; }, 1800); }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(ok, function(){ window.prompt("Copy this link:", url); });
+    } else {
+      window.prompt("Copy this link:", url);
+    }
+  });
+})();
 
 Store.get(META_KEY).then(function(v){
   if(v){ try{ itemMeta = JSON.parse(v) || {}; }catch(e){ itemMeta = {}; } }
